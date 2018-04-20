@@ -20,3 +20,8 @@ export LIBVA_DRIVER_NAME=dump
 export DUMP_COUNT=250
 vlc "$1" > frames.h
 ```
+
+## Output
+
+libva-dump will save dumped slices in the current directory, named following the
+"slice-%d.dump" format. This can be modified in `src/dump.c` if needed.
