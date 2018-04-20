@@ -1,0 +1,22 @@
+# libva-dump
+
+libva-dump allows dumping metadata and slices from videos.
+
+## Usage
+
+To get started with libva-dump, a video player that supports VAAPI is required,
+such as VLC. Specific environment variables need to be set in order to use and
+configure the backend:
+* LIBVA_DRIVER_NAME: the libVA backend to use, must be set to "dump"
+* DUMP_COUNT: the number of frames to dump (defaults to 3 if unspecified)
+
+## Example script
+
+An example script that takes the video to dump as first argument follows:
+```
+#!/bin/sh
+
+export LIBVA_DRIVER_NAME=dump
+export DUMP_COUNT=250
+vlc "$1" > frames.h
+```
