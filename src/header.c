@@ -88,7 +88,7 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	else
 		forward_reference_index = index;
 
-	header_dump_format("forward_index", "%d", forward_reference_index);
+	header_dump_format("forward_ref_index", "%d", forward_reference_index);
 
 	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, parameters->backward_reference_picture);
 	if (surface_object != NULL)
@@ -96,7 +96,7 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	else
 		backward_reference_index = index;
 
-	header_dump_format("backward_index", "%d", backward_reference_index);
+	header_dump_format("backward_ref_index", "%d", backward_reference_index);
 
 	header_dump_tail();
 }
