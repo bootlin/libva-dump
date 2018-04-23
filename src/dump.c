@@ -16,9 +16,9 @@
  */
 
 #include <stdlib.h>
-
 #include <unistd.h>
 #include <stdarg.h>
+#include <string.h>
 #include <fcntl.h>
 
 #include <va/va_backend.h>
@@ -34,64 +34,7 @@
 
 #include "autoconfig.h"
 
-VAStatus DumpTerminate(VADriverContextP context)
-{
-	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
-	struct object_buffer *buffer_object;
-	struct object_image *image_object;
-	struct object_surface *surface_object;
-	struct object_context *context_object;
-	struct object_config *config_object;
-	object_heap_iterator iterator;
-
-	image_object = (struct object_image *) object_heap_first(&driver_data->image_heap, &iterator);
-	while (image_object != NULL) {
-		DumpDestroyImage(context, (VAImageID) image_object->base.id);
-		image_object = (struct object_image *) object_heap_next(&driver_data->image_heap, &iterator);
-	}
-
-	object_heap_destroy(&driver_data->image_heap);
-
-	buffer_object = (struct object_buffer *) object_heap_first(&driver_data->buffer_heap, &iterator);
-	while (buffer_object != NULL) {
-		DumpDestroyBuffer(context, (VABufferID) buffer_object->base.id);
-		buffer_object = (struct object_buffer *) object_heap_next(&driver_data->buffer_heap, &iterator);
-	}
-
-	object_heap_destroy(&driver_data->buffer_heap);
-
-	surface_object = (struct object_surface *) object_heap_first(&driver_data->surface_heap, &iterator);
-	while (surface_object != NULL) {
-		DumpDestroySurfaces(context, (VASurfaceID *) &surface_object->base.id, 1);
-		surface_object = (struct object_surface *) object_heap_next(&driver_data->surface_heap, &iterator);
-	}
-
-	object_heap_destroy(&driver_data->surface_heap);
-
-	context_object = (struct object_context *) object_heap_first(&driver_data->context_heap, &iterator);
-	while (context_object != NULL) {
-		DumpDestroyContext(context, (VAContextID) context_object->base.id);
-		context_object = (struct object_context *) object_heap_next(&driver_data->context_heap, &iterator);
-	}
-
-	object_heap_destroy(&driver_data->context_heap);
-
-	config_object = (struct object_config *) object_heap_first(&driver_data->config_heap, &iterator);
-	while (config_object != NULL) {
-		DumpDestroyConfig(context, (VAConfigID) config_object->base.id);
-		config_object = (struct object_config *) object_heap_next(&driver_data->config_heap, &iterator);
-	}
-
-	object_heap_destroy(&driver_data->config_heap);
-
-	free(context->pDriverData);
-	context->pDriverData = NULL;
-
-	return VA_STATUS_SUCCESS;
-}
-
-/* Only expose the init function. */
-VAStatus __attribute__((visibility("default"))) VA_DRIVER_INIT_FUNC(VADriverContextP context) // FIXME: might bug here
+VAStatus VA_DRIVER_INIT_FUNC(VADriverContextP context)
 {
 	struct dump_driver_data *driver_data;
 	struct VADriverVTable *vtable = context->vtable;
@@ -176,6 +119,62 @@ VAStatus __attribute__((visibility("default"))) VA_DRIVER_INIT_FUNC(VADriverCont
 	env = getenv("DUMP_COUNT");
 	if (env != NULL)
 		driver_data->dump_count = atoi(env);
+
+	return VA_STATUS_SUCCESS;
+}
+
+VAStatus DumpTerminate(VADriverContextP context)
+{
+	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
+	struct object_buffer *buffer_object;
+	struct object_image *image_object;
+	struct object_surface *surface_object;
+	struct object_context *context_object;
+	struct object_config *config_object;
+	object_heap_iterator iterator;
+
+	image_object = (struct object_image *) object_heap_first(&driver_data->image_heap, &iterator);
+	while (image_object != NULL) {
+		DumpDestroyImage(context, (VAImageID) image_object->base.id);
+		image_object = (struct object_image *) object_heap_next(&driver_data->image_heap, &iterator);
+	}
+
+	object_heap_destroy(&driver_data->image_heap);
+
+	buffer_object = (struct object_buffer *) object_heap_first(&driver_data->buffer_heap, &iterator);
+	while (buffer_object != NULL) {
+		DumpDestroyBuffer(context, (VABufferID) buffer_object->base.id);
+		buffer_object = (struct object_buffer *) object_heap_next(&driver_data->buffer_heap, &iterator);
+	}
+
+	object_heap_destroy(&driver_data->buffer_heap);
+
+	surface_object = (struct object_surface *) object_heap_first(&driver_data->surface_heap, &iterator);
+	while (surface_object != NULL) {
+		DumpDestroySurfaces(context, (VASurfaceID *) &surface_object->base.id, 1);
+		surface_object = (struct object_surface *) object_heap_next(&driver_data->surface_heap, &iterator);
+	}
+
+	object_heap_destroy(&driver_data->surface_heap);
+
+	context_object = (struct object_context *) object_heap_first(&driver_data->context_heap, &iterator);
+	while (context_object != NULL) {
+		DumpDestroyContext(context, (VAContextID) context_object->base.id);
+		context_object = (struct object_context *) object_heap_next(&driver_data->context_heap, &iterator);
+	}
+
+	object_heap_destroy(&driver_data->context_heap);
+
+	config_object = (struct object_config *) object_heap_first(&driver_data->config_heap, &iterator);
+	while (config_object != NULL) {
+		DumpDestroyConfig(context, (VAConfigID) config_object->base.id);
+		config_object = (struct object_config *) object_heap_next(&driver_data->config_heap, &iterator);
+	}
+
+	object_heap_destroy(&driver_data->config_heap);
+
+	free(context->pDriverData);
+	context->pDriverData = NULL;
 
 	return VA_STATUS_SUCCESS;
 }

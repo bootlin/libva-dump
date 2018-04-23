@@ -36,9 +36,9 @@ struct object_context {
 	struct object_base base;
 
 	VAConfigID config_id;
-	VASurfaceID current_render_target;
-	VASurfaceID *render_targets;
-	int render_targets_count;
+	VASurfaceID render_surface_id;
+	VASurfaceID *surfaces_ids;
+	int surfaces_count;
 
 	int picture_width;
 	int picture_height;
@@ -49,7 +49,7 @@ struct object_context {
  * Functions
  */
 
-VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int picture_width, int picture_height, int flag, VASurfaceID *render_targets, int render_targets_count, VAContextID *context_id);
+VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int picture_width, int picture_height, int flag, VASurfaceID *surfaces_ids, int surfaces_count, VAContextID *context_id);
 VAStatus DumpDestroyContext(VADriverContextP context, VAContextID context_id);
 
 #endif

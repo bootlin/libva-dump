@@ -23,7 +23,7 @@
 #include "dump.h"
 #include "surface.h"
 
-VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format, unsigned int width, unsigned int height, VASurfaceID *surfaces, unsigned int surfaces_count, VASurfaceAttrib *attributes, unsigned int attributes_count)
+VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format, unsigned int width, unsigned int height, VASurfaceID *surfaces_ids, unsigned int surfaces_count, VASurfaceAttrib *attributes, unsigned int attributes_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
@@ -45,25 +45,25 @@ VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format, unsi
 		surface_object->height = height;
 		surface_object->index = i;
 
-		surfaces[i] = id;
+		surfaces_ids[i] = id;
 	}
 
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpCreateSurfaces(VADriverContextP context, int width, int height, int format, int surfaces_count, VASurfaceID *surfaces)
+VAStatus DumpCreateSurfaces(VADriverContextP context, int width, int height, int format, int surfaces_count, VASurfaceID *surfaces_ids)
 {
-	return DumpCreateSurfaces2(context, format, width, height, surfaces, surfaces_count, NULL, 0);
+	return DumpCreateSurfaces2(context, format, width, height, surfaces_ids, surfaces_count, NULL, 0);
 }
 
-VAStatus DumpDestroySurfaces(VADriverContextP context, VASurfaceID *surfaces, int surfaces_count)
+VAStatus DumpDestroySurfaces(VADriverContextP context, VASurfaceID *surfaces_ids, int surfaces_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
 	int i;
 
 	for (i = 0; i < surfaces_count; i++) {
-		surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surfaces[i]);
+		surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surfaces_ids[i]);
 		if (surface_object == NULL)
 			return VA_STATUS_ERROR_INVALID_SURFACE;
 
@@ -73,12 +73,12 @@ VAStatus DumpDestroySurfaces(VADriverContextP context, VASurfaceID *surfaces, in
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpSyncSurface(VADriverContextP context, VASurfaceID render_target)
+VAStatus DumpSyncSurface(VADriverContextP context, VASurfaceID surface_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
 
-	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, render_target);
+	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surface_id);
 	if (surface_object == NULL)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
 
@@ -87,12 +87,12 @@ VAStatus DumpSyncSurface(VADriverContextP context, VASurfaceID render_target)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQuerySurfaceStatus(VADriverContextP context, VASurfaceID render_target, VASurfaceStatus *status)
+VAStatus DumpQuerySurfaceStatus(VADriverContextP context, VASurfaceID surface_id, VASurfaceStatus *status)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
 
-	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, render_target);
+	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surface_id);
 	if (surface_object == NULL)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
 
@@ -157,7 +157,7 @@ VAStatus DumpPutSurface(VADriverContextP context, VASurfaceID surface_id, void *
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpLockSurface(VADriverContextP context, VASurfaceID surface, unsigned int *fourcc, unsigned int *luma_stride, unsigned int *chroma_u_stride, unsigned int *chroma_v_stride, unsigned int *luma_offset, unsigned int *chroma_u_offset, unsigned int *chroma_v_offset, unsigned int *buffer_name, void **buffer)
+VAStatus DumpLockSurface(VADriverContextP context, VASurfaceID surface_id, unsigned int *fourcc, unsigned int *luma_stride, unsigned int *chroma_u_stride, unsigned int *chroma_v_stride, unsigned int *luma_offset, unsigned int *chroma_u_offset, unsigned int *chroma_v_offset, unsigned int *buffer_name, void **buffer)
 {
 	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }

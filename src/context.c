@@ -22,13 +22,13 @@
 #include "context.h"
 #include "config.h"
 
-VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int picture_width, int picture_height, int flag, VASurfaceID *render_targets, int render_targets_count, VAContextID *context_id)
+VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int picture_width, int picture_height, int flag, VASurfaceID *surfaces_ids, int surfaces_count, VAContextID *context_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_config *config_object;
 	struct object_surface *surface_object;
 	struct object_context *context_object = NULL;
-	VASurfaceID *targets = NULL;
+	VASurfaceID *ids = NULL;
 	VAContextID id;
 	VAStatus status;
 	unsigned int i;
@@ -39,12 +39,6 @@ VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int p
 		goto error;
 	}
 
-	targets = malloc(render_targets_count * sizeof(VASurfaceID));
-	if (targets == NULL) {
-		status = VA_STATUS_ERROR_ALLOCATION_FAILED;
-		goto error;
-	}
-
 	id = object_heap_allocate(&driver_data->context_heap);
 	context_object = (struct object_context *) object_heap_lookup(&driver_data->context_heap, id);
 	if (context_object == NULL) {
@@ -52,15 +46,24 @@ VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int p
 		goto error;
 	}
 
-	for (i = 0; i < render_targets_count; i++) {
-		surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, render_targets[i]);
+	ids = malloc(surfaces_count * sizeof(VASurfaceID));
+	if (ids == NULL) {
+		status = VA_STATUS_ERROR_ALLOCATION_FAILED;
+		goto error;
+	}
+
+	for (i = 0; i < surfaces_count; i++) {
+		surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surfaces_ids[i]);
 		if (surface_object == NULL) {
 			status = VA_STATUS_ERROR_INVALID_SURFACE;
 			goto error;
 		}
+
+		ids[i] = surfaces_ids[i];
 	}
 
 	context_object->config_id = config_id;
+	context_object->surfaces_ids = ids;
 
 	*context_id = id;
 
@@ -68,8 +71,8 @@ VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int p
 	goto complete;
 
 error:
-	if (targets != NULL)
-		free(targets);
+	if (ids != NULL)
+		free(ids);
 
 	if (context_object != NULL)
 		object_heap_free(&driver_data->context_heap, (struct object_base *) context_object);

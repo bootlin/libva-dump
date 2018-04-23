@@ -49,12 +49,12 @@ struct object_surface {
 VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format, unsigned int width, unsigned int height, VASurfaceID *surfaces, unsigned int surfaces_count, VASurfaceAttrib *attributes, unsigned int attributes_count);
 VAStatus DumpCreateSurfaces(VADriverContextP context, int width, int height, int format, int surfaces_count, VASurfaceID *surfaces);
 VAStatus DumpDestroySurfaces(VADriverContextP context, VASurfaceID *surfaces, int surfaces_count);
-VAStatus DumpSyncSurface(VADriverContextP context, VASurfaceID render_target);
-VAStatus DumpQuerySurfaceStatus(VADriverContextP context, VASurfaceID render_target, VASurfaceStatus *status);
+VAStatus DumpSyncSurface(VADriverContextP context, VASurfaceID surface_id);
+VAStatus DumpQuerySurfaceStatus(VADriverContextP context, VASurfaceID surface_id, VASurfaceStatus *status);
 VAStatus DumpQuerySurfaceAttributes(VADriverContextP context, VAConfigID config_id, VASurfaceAttrib *attributes, unsigned int *attributes_count);
 VAStatus DumpGetSurfaceAttributes(VADriverContextP context, VAConfigID config_id, VASurfaceAttrib *attributes, unsigned int attributes_count);
 VAStatus DumpPutSurface(VADriverContextP context, VASurfaceID surface_id, void *draw, short src_x, short src_y, unsigned short src_width, unsigned short src_height, short dst_x, short dst_y, unsigned short dst_width, unsigned short dst_height, VARectangle *cliprects, unsigned int cliprects_count, unsigned int flags);
-VAStatus DumpLockSurface(VADriverContextP context, VASurfaceID surface, unsigned int *fourcc, unsigned int *luma_stride, unsigned int *chroma_u_stride, unsigned int *chroma_v_stride, unsigned int *luma_offset, unsigned int *chroma_u_offset, unsigned int *chroma_v_offset, unsigned int *buffer_name, void **buffer);
+VAStatus DumpLockSurface(VADriverContextP context, VASurfaceID surface_id, unsigned int *fourcc, unsigned int *luma_stride, unsigned int *chroma_u_stride, unsigned int *chroma_v_stride, unsigned int *luma_offset, unsigned int *chroma_u_offset, unsigned int *chroma_v_offset, unsigned int *buffer_name, void **buffer);
 VAStatus DumpUnlockSurface(VADriverContextP context, VASurfaceID surface);
 
 #endif

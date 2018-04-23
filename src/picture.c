@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -50,7 +51,7 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASu
 		return VA_STATUS_ERROR_INVALID_SURFACE;
 
 	surface_object->status = VASurfaceRendering;
-	context_object->current_render_target = surface_id;
+	context_object->render_surface_id = surface_id;
 
 	index = driver_data->frame_index;
 	if (index >= driver_data->dump_count)
@@ -92,7 +93,7 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id, VAB
 	if (config_object == NULL)
 		return VA_STATUS_ERROR_INVALID_CONFIG;
 
-	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, context_object->current_render_target);
+	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, context_object->render_surface_id);
 	if (surface_object == NULL)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
 
@@ -134,14 +135,14 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 	if (context_object == NULL)
 		return VA_STATUS_ERROR_INVALID_CONTEXT;
 
-	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, context_object->current_render_target);
+	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, context_object->render_surface_id);
 	if (surface_object == NULL)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
 
 	/* Update last-seen frame index of the surface to stay in sync with current frame index. */
 	surface_object->index = driver_data->frame_index;
 
-	context_object->current_render_target = VA_INVALID_ID;
+	context_object->render_surface_id = VA_INVALID_ID;
 
 	if (driver_data->dump_fd >= 0) {
 		close(driver_data->dump_fd);

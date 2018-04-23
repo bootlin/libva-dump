@@ -52,12 +52,12 @@ VAStatus DumpSetSubpictureGlobalAlpha(VADriverContextP ctx, VASubpictureID subpi
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpAssociateSubpicture(VADriverContextP context, VASubpictureID subpicture_id, VASurfaceID *target_surfaces, int target_surfaces_count, short src_x, short src_y, unsigned short src_width, unsigned short src_height, short dst_x, short dst_y, unsigned short dst_width, unsigned short dst_height, unsigned int flags)
+VAStatus DumpAssociateSubpicture(VADriverContextP context, VASubpictureID subpicture_id, VASurfaceID *surfaces_ids, int surfaces_count, short src_x, short src_y, unsigned short src_width, unsigned short src_height, short dst_x, short dst_y, unsigned short dst_width, unsigned short dst_height, unsigned int flags)
 {
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpDeassociateSubpicture(VADriverContextP context, VASubpictureID subpicture_id, VASurfaceID *target_surfaces, int target_surfaces_count)
+VAStatus DumpDeassociateSubpicture(VADriverContextP context, VASubpictureID subpicture_id, VASurfaceID *surfaces_ids, int surfaces_count)
 {
 	return VA_STATUS_SUCCESS;
 }

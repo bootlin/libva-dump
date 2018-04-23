@@ -18,6 +18,8 @@
 #ifndef _DUMP_H_
 #define _DUMP_H_
 
+#include <va/va_backend.h>
+
 #include "object_heap.h"
 
 /*
@@ -52,5 +54,12 @@ struct dump_driver_data {
 	int dump_fd;
 	unsigned int frame_index;
 };
+
+/*
+ * Functions
+ */
+
+VAStatus __attribute__((visibility("default"))) VA_DRIVER_INIT_FUNC(VADriverContextP context);
+VAStatus DumpTerminate(VADriverContextP context);
 
 #endif
