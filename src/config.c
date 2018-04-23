@@ -170,15 +170,15 @@ VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile,
 
 VAStatus DumpQueryDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int *attributes_count)
 {
-	return VA_STATUS_ERROR_UNKNOWN;
+	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus DumpGetDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int attributes_count)
 {
-	return VA_STATUS_ERROR_UNKNOWN;
+	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus DumpSetDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int attributes_count)
 {
-	return VA_STATUS_ERROR_UNKNOWN;
+	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
