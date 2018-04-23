@@ -59,7 +59,7 @@ struct dump_driver_data {
  * Functions
  */
 
-VAStatus __attribute__((visibility("default"))) VA_DRIVER_INIT_FUNC(VADriverContextP context);
+VAStatus VA_DRIVER_INIT_FUNC(VADriverContextP context);
 VAStatus DumpTerminate(VADriverContextP context);
 
 #endif

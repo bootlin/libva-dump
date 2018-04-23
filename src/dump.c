@@ -34,6 +34,9 @@
 
 #include "autoconfig.h"
 
+/* Set default visibility for the init function only. */
+VAStatus __attribute__((visibility("default"))) VA_DRIVER_INIT_FUNC(VADriverContextP context);
+
 VAStatus VA_DRIVER_INIT_FUNC(VADriverContextP context)
 {
 	struct dump_driver_data *driver_data;
