@@ -1,36 +1,21 @@
-AM_CPPFLAGS = \
-	-DPTHREADS		\
-	$(X11_DEPS_CFLAGS)\
-	$(DRM_CFLAGS)		\
-	$(LIBVA_DEPS_CFLAGS)
+AM_CPPFLAGS = -DPTHREADS $(X11_DEPS_CFLAGS) $(DRM_CFLAGS) $(LIBVA_DEPS_CFLAGS)
 
-driver_cflags = \
-	-Wall			\
-	-fvisibility=hidden
+backend_cflags = -Wall -fvisibility=hidden
+backend_ldflags = -module -avoid-version -no-undefined -Wl,--no-undefined
+backend_libs = -lpthread -ldl $(DRM_LIBS) $(X11_DEPS_LIBS) $(LIBVA_DEPS_LIBS)
 
-driver_ldflags = \
-	-module -avoid-version	\
-	-no-undefined		\
-	-Wl,--no-undefined
+backend_c = dump.c object_heap.c config.c surface.c context.c buffer.c \
+	header.c picture.c subpicture.c image.c
 
-driver_libs = \
-	-lpthread -ldl		\
-	$(DRM_LIBS)		\
-	$(X11_DEPS_LIBS)	\
-	$(LIBVA_DEPS_LIBS)
+backend_h = dump.h object_heap.h config.h surface.h context.h buffer.h \
+	header.h picture.h subpicture.h image.h
 
-source_c = dump.c object_heap.c buffer.c config.c context.c image.c picture.c \
-	subpicture.c surface.c header.c
-
-source_h = dump.h object_heap.h buffer.h config.h context.h image.h picture.h \
-	subpicture.h surface.h header.h
-
-dump_drv_video_la_LTLIBRARIES	= dump_drv_video.la
-dump_drv_video_ladir		= $(LIBVA_DRIVERS_PATH)
-dump_drv_video_la_CFLAGS	= $(driver_cflags)
-dump_drv_video_la_LDFLAGS	= $(driver_ldflags)
-dump_drv_video_la_LIBADD	= $(driver_libs)
-dump_drv_video_la_SOURCES	= $(source_c)
-noinst_HEADERS				= $(source_h)
+dump_drv_video_la_LTLIBRARIES = dump_drv_video.la
+dump_drv_video_ladir = $(LIBVA_DRIVERS_PATH)
+dump_drv_video_la_CFLAGS = $(backend_cflags)
+dump_drv_video_la_LDFLAGS = $(backend_ldflags)
+dump_drv_video_la_LIBADD = $(backend_libs)
+dump_drv_video_la_SOURCES = $(backend_c)
+noinst_HEADERS = $(backend_h)
 
 MAINTAINERCLEANFILES = Makefile.in autoconfig.h.in
