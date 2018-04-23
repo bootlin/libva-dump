@@ -48,10 +48,10 @@ struct object_buffer {
  */
 
 VAStatus DumpCreateBuffer(VADriverContextP context, VAContextID context_id, VABufferType type, unsigned int size, unsigned int count, void *data, VABufferID *buffer_id);
-VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id, unsigned int count);
+VAStatus DumpDestroyBuffer(VADriverContextP context, VABufferID buffer_id);
 VAStatus DumpMapBuffer(VADriverContextP context, VABufferID buffer_id, void **data_map);
 VAStatus DumpUnmapBuffer(VADriverContextP context, VABufferID buffer_id);
-VAStatus DumpDestroyBuffer(VADriverContextP context, VABufferID buffer_id);
+VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id, unsigned int count);
 VAStatus DumpBufferInfo(VADriverContextP context, VABufferID buffer_id, VABufferType *type, unsigned int *size, unsigned int *count);
 
 #endif

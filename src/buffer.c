@@ -66,7 +66,7 @@ VAStatus DumpCreateBuffer(VADriverContextP context, VAContextID context_id, VABu
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id, unsigned int count)
+VAStatus DumpDestroyBuffer(VADriverContextP context, VABufferID buffer_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_buffer *buffer_object;
@@ -75,10 +75,10 @@ VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id
 	if (buffer_object == NULL)
 		return VA_STATUS_ERROR_INVALID_BUFFER;
 
-	if (count > buffer_object->initial_count)
-		return VA_STATUS_ERROR_INVALID_PARAMETER;
+	if (buffer_object->data != NULL)
+		free(buffer_object->data);
 
-	buffer_object->count = count;
+	object_heap_free(&driver_data->buffer_heap, (struct object_base *) buffer_object);
 
 	return VA_STATUS_SUCCESS;
 }
@@ -112,7 +112,7 @@ VAStatus DumpUnmapBuffer(VADriverContextP context, VABufferID buffer_id)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpDestroyBuffer(VADriverContextP context, VABufferID buffer_id)
+VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id, unsigned int count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_buffer *buffer_object;
@@ -121,10 +121,10 @@ VAStatus DumpDestroyBuffer(VADriverContextP context, VABufferID buffer_id)
 	if (buffer_object == NULL)
 		return VA_STATUS_ERROR_INVALID_BUFFER;
 
-	if (buffer_object->data != NULL)
-		free(buffer_object->data);
+	if (count > buffer_object->initial_count)
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
 
-	object_heap_free(&driver_data->buffer_heap, (struct object_base *) buffer_object);
+	buffer_object->count = count;
 
 	return VA_STATUS_SUCCESS;
 }

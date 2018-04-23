@@ -20,9 +20,9 @@
 
 #include <va/va_backend.h>
 
-VAStatus DumpQuerySubpictureFormats(VADriverContextP context, VAImageFormat *formats, unsigned int *flags, unsigned int *formats_count);
 VAStatus DumpCreateSubpicture(VADriverContextP context, VAImageID image_id, VASubpictureID *subpicture_id);
 VAStatus DumpDestroySubpicture(VADriverContextP context, VASubpictureID subpicture_id);
+VAStatus DumpQuerySubpictureFormats(VADriverContextP context, VAImageFormat *formats, unsigned int *flags, unsigned int *formats_count);
 VAStatus DumpSetSubpictureImage(VADriverContextP context, VASubpictureID subpicture_id, VAImageID image_id);
 VAStatus DumpSetSubpicturePalette(VADriverContextP context, VASubpictureID subpicture_id, unsigned char *palette);
 VAStatus DumpSetSubpictureChromakey(VADriverContextP context, VASubpictureID subpicture_id, unsigned int chromakey_min, unsigned int chromakey_max, unsigned int chromakey_mask);

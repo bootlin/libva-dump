@@ -23,14 +23,6 @@
 #include "surface.h"
 #include "buffer.h"
 
-VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats, int *formats_count)
-{
-	formats[0].fourcc = VA_FOURCC_NV12;
-	*formats_count = 1;
-
-	return VA_STATUS_SUCCESS;
-}
-
 VAStatus DumpCreateImage(VADriverContextP context, VAImageFormat *format, int width, int height, VAImage *image)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
@@ -72,6 +64,25 @@ VAStatus DumpCreateImage(VADriverContextP context, VAImageFormat *format, int wi
 	return VA_STATUS_SUCCESS;
 }
 
+VAStatus DumpDestroyImage(VADriverContextP context, VAImageID image_id)
+{
+	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
+	struct object_image *image_object;
+	VAStatus status;
+
+	image_object = (struct object_image *) object_heap_lookup(&driver_data->image_heap, image_id);
+	if (image_object == NULL)
+		return VA_STATUS_ERROR_INVALID_IMAGE;
+
+	status = DumpDestroyBuffer(context, image_object->buffer_id);
+	if (status != VA_STATUS_SUCCESS)
+		return status;
+
+	object_heap_free(&driver_data->image_heap, (struct object_base *) image_object);
+
+	return VA_STATUS_SUCCESS;
+}
+
 VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id, VAImage *image)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
@@ -94,21 +105,10 @@ VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id, VAIma
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpDestroyImage(VADriverContextP context, VAImageID image_id)
+VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats, int *formats_count)
 {
-	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
-	struct object_image *image_object;
-	VAStatus status;
-
-	image_object = (struct object_image *) object_heap_lookup(&driver_data->image_heap, image_id);
-	if (image_object == NULL)
-		return VA_STATUS_ERROR_INVALID_IMAGE;
-
-	status = DumpDestroyBuffer(context, image_object->buffer_id);
-	if (status != VA_STATUS_SUCCESS)
-		return status;
-
-	object_heap_free(&driver_data->image_heap, (struct object_base *) image_object);
+	formats[0].fourcc = VA_FOURCC_NV12;
+	*formats_count = 1;
 
 	return VA_STATUS_SUCCESS;
 }

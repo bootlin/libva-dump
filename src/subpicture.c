@@ -17,17 +17,17 @@
 
 #include "subpicture.h"
 
-VAStatus DumpQuerySubpictureFormats(VADriverContextP context, VAImageFormat *formats, unsigned int *flags, unsigned int *formats_count)
-{
-	return VA_STATUS_SUCCESS;
-}
-
 VAStatus DumpCreateSubpicture(VADriverContextP context, VAImageID image_id, VASubpictureID *subpicture_id)
 {
 	return VA_STATUS_SUCCESS;
 }
 
 VAStatus DumpDestroySubpicture(VADriverContextP context, VASubpictureID subpicture_id)
+{
+	return VA_STATUS_SUCCESS;
+}
+
+VAStatus DumpQuerySubpictureFormats(VADriverContextP context, VAImageFormat *formats, unsigned int *flags, unsigned int *formats_count)
 {
 	return VA_STATUS_SUCCESS;
 }
