@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SURFACES_H_
-#define _SURFACES_H_
+#ifndef _SURFACE_H_
+#define _SURFACE_H_
 
 #include <va/va_backend.h>
 
