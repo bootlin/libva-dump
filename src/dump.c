@@ -99,7 +99,6 @@ VAStatus VA_DRIVER_INIT_FUNC(VADriverContextP context)
 	vtable->vaUnlockSurface = DumpUnlockSurface;
 	vtable->vaGetSurfaceAttributes = DumpGetSurfaceAttributes;
 	vtable->vaQuerySurfaceAttributes = DumpQuerySurfaceAttributes;
-
 	vtable->vaBufferInfo = DumpBufferInfo;
 
 	driver_data = (struct dump_driver_data *) malloc(sizeof(*driver_data));
