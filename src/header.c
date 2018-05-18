@@ -42,7 +42,8 @@ void mpeg2_start_dump(struct dump_driver_data *driver_data)
 
 	print_indent(1, "{\n");
 	print_indent(2, ".index = %d,\n", index);
-	print_indent(2, ".header = {\n");
+	print_indent(2, ".type = DUMP_FRAME_MPEG2,\n");
+	print_indent(2, ".frame.mpeg2.header = {\n");
 }
 
 void mpeg2_stop_dump(struct dump_driver_data *driver_data)
