@@ -23,5 +23,6 @@
 #include "dump.h"
 
 void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterBufferMPEG2 *parameters);
+void mpeg2_stop_dump(struct dump_driver_data *driver_data);
 
 #endif

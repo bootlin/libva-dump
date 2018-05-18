@@ -36,6 +36,7 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASu
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_context *context_object;
+	struct object_config *config_object;
 	struct object_surface *surface_object;
 	char *slice_filename;
 	char *slice_path;
@@ -45,6 +46,10 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASu
 	context_object = (struct object_context *) object_heap_lookup(&driver_data->context_heap, context_id);
 	if (context_object == NULL)
 		return VA_STATUS_ERROR_INVALID_CONTEXT;
+
+	config_object = (struct object_config *) object_heap_lookup(&driver_data->config_heap, context_object->config_id);
+	if (config_object == NULL)
+		return VA_STATUS_ERROR_INVALID_CONFIG;
 
 	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surface_id);
 	if (surface_object == NULL)
@@ -71,6 +76,17 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASu
 	}
 
 	driver_data->dump_fd = fd;
+
+	switch (config_object->profile) {
+		case VAProfileMPEG2Simple:
+		case VAProfileMPEG2Main:
+			mpeg2_start_dump(driver_data);
+			break;
+
+		default:
+			fprintf(stderr, "Unsupported profile\n");
+			return VA_STATUS_SUCCESS;
+	}
 
 	return VA_STATUS_SUCCESS;
 }
@@ -129,15 +145,33 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_context *context_object;
+	struct object_config *config_object;
 	struct object_surface *surface_object;
 
 	context_object = (struct object_context *) object_heap_lookup(&driver_data->context_heap, context_id);
 	if (context_object == NULL)
 		return VA_STATUS_ERROR_INVALID_CONTEXT;
 
+	config_object = (struct object_config *) object_heap_lookup(&driver_data->config_heap, context_object->config_id);
+	if (config_object == NULL)
+		return VA_STATUS_ERROR_INVALID_CONFIG;
+
 	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, context_object->render_surface_id);
 	if (surface_object == NULL)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
+
+	if (driver_data->frame_index < driver_data->dump_count) {
+		switch (config_object->profile) {
+			case VAProfileMPEG2Simple:
+			case VAProfileMPEG2Main:
+				mpeg2_stop_dump(driver_data);
+				break;
+
+			default:
+				fprintf(stderr, "Unsupported profile\n");
+				return VA_STATUS_SUCCESS;
+		}
+	}
 
 	/* Update last-seen frame index of the surface to stay in sync with current frame index. */
 	surface_object->index = driver_data->frame_index;

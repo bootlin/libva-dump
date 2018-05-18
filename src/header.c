@@ -23,19 +23,6 @@
 #include "header.h"
 #include "surface.h"
 
-static void header_dump_head(unsigned int index)
-{
-	printf("	{\n");
-	printf("		.index = %d,\n", index);
-	printf("		.header = {\n");
-}
-
-static void header_dump_tail(void)
-{
-	printf("		},\n");
-	printf("	},\n");
-}
-
 static void header_dump_format(const char *field, const char *format, ...)
 {
 	char buffer[1024];
@@ -49,6 +36,21 @@ static void header_dump_format(const char *field, const char *format, ...)
 	va_end(args);
 }
 
+void mpeg2_start_dump(struct dump_driver_data *driver_data)
+{
+	unsigned int index = driver_data->frame_index;
+
+	printf("	{\n");
+	printf("		.index = %d,\n", index);
+	printf("		.header = {\n");
+}
+
+void mpeg2_stop_dump(struct dump_driver_data *driver_data)
+{
+	printf("		},\n");
+	printf("	},\n");
+}
+
 void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterBufferMPEG2 *parameters)
 {
 	struct object_surface *surface_object;
@@ -56,8 +58,6 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	unsigned int forward_reference_index;
 	unsigned int backward_reference_index;
 	unsigned int index = driver_data->frame_index;
-
-	header_dump_head(index);
 
 	if (parameters->picture_coding_type == 1)
 		slice_type = "PCT_I";
@@ -97,6 +97,4 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 		backward_reference_index = index;
 
 	header_dump_format("backward_ref_index", "%d", backward_reference_index);
-
-	header_dump_tail();
 }
