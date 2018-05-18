@@ -53,6 +53,10 @@ struct dump_driver_data {
 
 	int dump_fd;
 	unsigned int frame_index;
+
+	VAIQMatrixBufferH264 matrix;
+	VAPictureParameterBufferH264 picture;
+	VASliceParameterBufferH264 slice;
 };
 
 /*

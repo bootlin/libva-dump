@@ -28,6 +28,15 @@ VAStatus DumpCreateConfig(VADriverContextP context, VAProfile profile, VAEntrypo
 	int i, index;
 
 	switch (profile) {
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264MultiviewHigh:
+		case VAProfileH264StereoHigh:
+			if (entrypoint != VAEntrypointVLD)
+				return VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+			break;
+
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
 			if (entrypoint != VAEntrypointVLD)
@@ -129,7 +138,12 @@ VAStatus DumpGetConfigAttributes(VADriverContextP context, VAProfile profile, VA
 
 VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles, int *profiles_count)
 {
-	VAProfile supported_profiles[] = { VAProfileMPEG2Simple, VAProfileMPEG2Main };
+	VAProfile supported_profiles[] = {
+		VAProfileH264ConstrainedBaseline,
+		VAProfileH264High,
+		VAProfileMPEG2Main,
+		VAProfileMPEG2Simple,
+	};
 	unsigned int supported_profiles_count = sizeof(supported_profiles) / sizeof(supported_profiles[0]);
 	unsigned int i;
 
@@ -147,6 +161,15 @@ VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles, 
 VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile, VAEntrypoint *entrypoints, int *entrypoints_count)
 {
 	switch (profile) {
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264MultiviewHigh:
+		case VAProfileH264StereoHigh:
+			entrypoints[0] = VAEntrypointVLD;
+			*entrypoints_count = 1;
+			break;
+
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
 			entrypoints[0] = VAEntrypointVLD;

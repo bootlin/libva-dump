@@ -22,6 +22,16 @@
 
 #include "dump.h"
 
+void h264_start_dump(struct dump_driver_data *driver_data);
+void h264_picture_parameter_dump(struct dump_driver_data *driver_data,
+				 VAPictureParameterBufferH264 *parameters);
+void h264_quantization_matrix_dump(struct dump_driver_data *driver_data,
+				   VAIQMatrixBufferH264 *parameters);
+void h264_slice_parameter_dump(struct dump_driver_data *driver_data,
+			       VASliceParameterBufferH264 *parameters);
+void h264_stop_dump(struct dump_driver_data *driver_data);
+
+void mpeg2_start_dump(struct dump_driver_data *driver_data);
 void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterBufferMPEG2 *parameters);
 void mpeg2_stop_dump(struct dump_driver_data *driver_data);
 

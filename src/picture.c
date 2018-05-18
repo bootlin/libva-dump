@@ -78,6 +78,14 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASu
 	driver_data->dump_fd = fd;
 
 	switch (config_object->profile) {
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264MultiviewHigh:
+		case VAProfileH264StereoHigh:
+			h264_start_dump(driver_data);
+			break;
+
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
 			mpeg2_start_dump(driver_data);
@@ -126,15 +134,52 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id, VAB
 		if (buffer_object->type == VASliceDataBufferType) {
 			fprintf(stderr, "Dumping %d bytes of slice %d/%d\n", buffer_object->size, driver_data->frame_index + 1, driver_data->dump_count);
 			write(driver_data->dump_fd, buffer_object->data, buffer_object->size);
+		} else if (buffer_object->type == VASliceParameterBufferType) {
+			switch (config_object->profile) {
+				case VAProfileH264Main:
+				case VAProfileH264High:
+				case VAProfileH264ConstrainedBaseline:
+				case VAProfileH264MultiviewHigh:
+				case VAProfileH264StereoHigh:
+					h264_slice_parameter_dump(driver_data,
+								  buffer_object->data);
+					break;
+			default:
+				break;
+			}
 		} else if (buffer_object->type == VAPictureParameterBufferType) {
 			switch (config_object->profile) {
 				case VAProfileMPEG2Simple:
 				case VAProfileMPEG2Main:
 					mpeg2_header_dump(driver_data, (VAPictureParameterBufferMPEG2 *) buffer_object->data);
 					break;
+				case VAProfileH264Main:
+				case VAProfileH264High:
+				case VAProfileH264ConstrainedBaseline:
+				case VAProfileH264MultiviewHigh:
+				case VAProfileH264StereoHigh:
+					h264_picture_parameter_dump(driver_data,
+								    buffer_object->data);
+					break;
 				default:
 					break;
 			}
+		} else if (buffer_object->type == VAIQMatrixBufferType) {
+			switch (config_object->profile) {
+				case VAProfileH264Main:
+				case VAProfileH264High:
+				case VAProfileH264ConstrainedBaseline:
+				case VAProfileH264MultiviewHigh:
+				case VAProfileH264StereoHigh:
+					h264_quantization_matrix_dump(driver_data,
+								      buffer_object->data);
+					break;
+			default:
+				break;
+			}
+		} else {
+			fprintf(stderr, "Unknown buffer type %d\n",
+				buffer_object->type);
 		}
 	}
 
@@ -162,6 +207,14 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 
 	if (driver_data->frame_index < driver_data->dump_count) {
 		switch (config_object->profile) {
+			case VAProfileH264Main:
+			case VAProfileH264High:
+			case VAProfileH264ConstrainedBaseline:
+			case VAProfileH264MultiviewHigh:
+			case VAProfileH264StereoHigh:
+				h264_stop_dump(driver_data);
+				break;
+
 			case VAProfileMPEG2Simple:
 			case VAProfileMPEG2Main:
 				mpeg2_stop_dump(driver_data);
