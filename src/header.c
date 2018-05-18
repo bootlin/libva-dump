@@ -23,16 +23,16 @@
 #include "header.h"
 #include "surface.h"
 
-static void header_dump_format(const char *field, const char *format, ...)
+static void print_indent(unsigned indent, const char *fmt, ...)
 {
-	char buffer[1024];
 	va_list args;
+	int i;
 
-	va_start(args, format);
-	vsnprintf((char *) &buffer, sizeof(buffer), format, args);
+	for (i = 0; i < indent; i++)
+		printf("\t");
 
-	printf("			.%s = %s,\n", field, buffer);
-
+	va_start(args, fmt);
+	vprintf(fmt, args);
 	va_end(args);
 }
 
@@ -40,15 +40,15 @@ void mpeg2_start_dump(struct dump_driver_data *driver_data)
 {
 	unsigned int index = driver_data->frame_index;
 
-	printf("	{\n");
-	printf("		.index = %d,\n", index);
-	printf("		.header = {\n");
+	print_indent(1, "{\n");
+	print_indent(2, ".index = %d,\n", index);
+	print_indent(2, ".header = {\n");
 }
 
 void mpeg2_stop_dump(struct dump_driver_data *driver_data)
 {
-	printf("		},\n");
-	printf("	},\n");
+	print_indent(2, "},\n");
+	print_indent(1, "},\n");
 }
 
 void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterBufferMPEG2 *parameters)
@@ -68,19 +68,28 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	else
 		slice_type = "PCT_INVALID";
 
-	header_dump_format("picture_coding_type", slice_type);
-	header_dump_format("f_code[0][0]", "%d", (parameters->f_code >> 12) & 0xf);
-	header_dump_format("f_code[0][1]", "%d", (parameters->f_code >> 8) & 0xf);
-	header_dump_format("f_code[1][0]", "%d", (parameters->f_code >> 4) & 0xf);
-	header_dump_format("f_code[1][1]", "%d", (parameters->f_code >> 0) & 0xf);
-	header_dump_format("intra_dc_precision", "%d", parameters->picture_coding_extension.bits.intra_dc_precision);
-	header_dump_format("picture_structure", "%d", parameters->picture_coding_extension.bits.picture_structure);
-	header_dump_format("top_field_first", "%d", parameters->picture_coding_extension.bits.top_field_first);
-	header_dump_format("frame_pred_frame_dct", "%d", parameters->picture_coding_extension.bits.frame_pred_frame_dct);
-	header_dump_format("concealment_motion_vectors", "%d", parameters->picture_coding_extension.bits.concealment_motion_vectors);
-	header_dump_format("q_scale_type", "%d", parameters->picture_coding_extension.bits.q_scale_type);
-	header_dump_format("intra_vlc_format", "%d", parameters->picture_coding_extension.bits.intra_vlc_format);
-	header_dump_format("alternate_scan", "%d", parameters->picture_coding_extension.bits.alternate_scan);
+	print_indent(3, ".picture_coding_type = %s,\n", slice_type);
+	print_indent(3, ".f_code = { %d, %d, %d, %d },\n",
+		     (parameters->f_code >> 12) & 0xf,
+		     (parameters->f_code >> 8) & 0xf,
+		     (parameters->f_code >> 4) & 0xf,
+		     (parameters->f_code >> 0) & 0xf);
+	print_indent(3, ".intra_dc_precision = %d,\n",
+		     parameters->picture_coding_extension.bits.intra_dc_precision);
+	print_indent(3, ".picture_structure = %d,\n",
+		     parameters->picture_coding_extension.bits.picture_structure);
+	print_indent(3, ".top_field_first = %d,\n",
+		     parameters->picture_coding_extension.bits.top_field_first);
+	print_indent(3, ".frame_pred_frame_dct = %d,\n",
+		     parameters->picture_coding_extension.bits.frame_pred_frame_dct);
+	print_indent(3, ".concealment_motion_vectors = %d,\n",
+		     parameters->picture_coding_extension.bits.concealment_motion_vectors);
+	print_indent(3, ".q_scale_type = %d,\n",
+		     parameters->picture_coding_extension.bits.q_scale_type);
+	print_indent(3, ".intra_vlc_format = %d,\n",
+		     parameters->picture_coding_extension.bits.intra_vlc_format);
+	print_indent(3, ".alternate_scan = %d,\n",
+		     parameters->picture_coding_extension.bits.alternate_scan);
 
 	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, parameters->forward_reference_picture);
 	if (surface_object != NULL)
@@ -88,7 +97,7 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	else
 		forward_reference_index = index;
 
-	header_dump_format("forward_ref_index", "%d", forward_reference_index);
+	print_indent(3, ".forward_ref_index = %d,\n", forward_reference_index);
 
 	surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, parameters->backward_reference_picture);
 	if (surface_object != NULL)
@@ -96,5 +105,5 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	else
 		backward_reference_index = index;
 
-	header_dump_format("backward_ref_index", "%d", backward_reference_index);
+	print_indent(3, ".backward_ref_index = %d,\n", backward_reference_index);
 }
