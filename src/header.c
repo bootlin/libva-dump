@@ -295,7 +295,6 @@ static void h264_emit_frame(struct dump_driver_data *driver_data)
 
 	print_indent(indent++, "{\n");
 	print_indent(indent, ".index = %d,\n", index);
-	print_indent(indent, ".type = DUMP_FRAME_H264,\n");
 	print_indent(indent++, ".frame.h264 = {\n");
 
 	h264_emit_picture_parameter(driver_data, indent);
@@ -335,7 +334,6 @@ void mpeg2_start_dump(struct dump_driver_data *driver_data)
 
 	print_indent(1, "{\n");
 	print_indent(2, ".index = %d,\n", index);
-	print_indent(2, ".type = DUMP_FRAME_MPEG2,\n");
 	print_indent(2, ".frame.mpeg2.header = {\n");
 }
 
@@ -354,13 +352,13 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterB
 	unsigned int index = driver_data->frame_index;
 
 	if (parameters->picture_coding_type == 1)
-		slice_type = "PCT_I";
+		slice_type = "V4L2_SLICE_PCT_I";
 	else if (parameters->picture_coding_type == 2)
-		slice_type = "PCT_P";
+		slice_type = "V4L2_SLICE_PCT_P";
 	else if (parameters->picture_coding_type == 3)
-		slice_type = "PCT_B";
+		slice_type = "V4L2_SLICE_PCT_B";
 	else
-		slice_type = "PCT_INVALID";
+		slice_type = "V4L2_SLICE_PCT_INVALID";
 
 	print_indent(3, ".picture_coding_type = %s,\n", slice_type);
 	print_indent(3, ".f_code = { %d, %d, %d, %d },\n",
