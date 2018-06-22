@@ -133,7 +133,7 @@ VAStatus DumpTerminate(VADriverContextP context)
 	struct object_surface *surface_object;
 	struct object_context *context_object;
 	struct object_config *config_object;
-	object_heap_iterator iterator;
+	int iterator;
 
 	image_object = (struct object_image *) object_heap_first(&driver_data->image_heap, &iterator);
 	while (image_object != NULL) {
