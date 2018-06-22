@@ -115,7 +115,8 @@ int object_heap_allocate(struct object_heap *heap)
 	return rc;
 }
 
-static struct object_base *object_heap_lookup_unlocked(struct object_heap *heap, int id)
+static struct object_base *object_heap_lookup_unlocked(struct object_heap *heap,
+	int id)
 {
 	struct object_base *object;
 	int bucket_index, object_index;
@@ -153,7 +154,8 @@ struct object_base *object_heap_first(struct object_heap *heap, int *iterator)
 	return object_heap_next(heap, iterator);
 }
 
-static struct object_base *object_heap_next_unlocked(struct object_heap *heap, int *iterator)
+static struct object_base *object_heap_next_unlocked(struct object_heap *heap,
+	int *iterator)
 {
 	struct object_base *object;
 	int bucket_index, object_index;
@@ -188,7 +190,8 @@ struct object_base *object_heap_next(struct object_heap *heap, int *iterator)
 	return object;
 }
 
-static void object_heap_free_unlocked(struct object_heap *heap, struct object_base *object)
+static void object_heap_free_unlocked(struct object_heap *heap,
+	struct object_base *object)
 {
 	object->next_free = heap->next_free;
 	heap->next_free = object->id & OBJECT_HEAP_ID_MASK;

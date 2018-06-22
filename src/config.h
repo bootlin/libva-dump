@@ -54,14 +54,25 @@ struct object_config {
  * Functions
  */
 
-VAStatus DumpCreateConfig(VADriverContextP context, VAProfile profile, VAEntrypoint entrypoint, VAConfigAttrib *attributes, int attributes_count, VAConfigID *config_id);
+VAStatus DumpCreateConfig(VADriverContextP context, VAProfile profile,
+	VAEntrypoint entrypoint, VAConfigAttrib *attributes,
+	int attributes_count, VAConfigID *config_id);
 VAStatus DumpDestroyConfig(VADriverContextP context, VAConfigID config_id);
-VAStatus DumpQueryConfigAttributes(VADriverContextP context, VAConfigID config_id, VAProfile *profile, VAEntrypoint *entrypoint, VAConfigAttrib *attributes, int *attributes_count);
-VAStatus DumpGetConfigAttributes(VADriverContextP context, VAProfile profile, VAEntrypoint entrypoint, VAConfigAttrib *attributes, int attributes_count);
-VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles, int *profiles_count);
-VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile, VAEntrypoint *entrypoints, int *entrypoints_count);
-VAStatus DumpQueryDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int *attributes_count);
-VAStatus DumpGetDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int attributes_count);
-VAStatus DumpSetDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int attributes_count);
+VAStatus DumpQueryConfigAttributes(VADriverContextP context,
+	VAConfigID config_id, VAProfile *profile, VAEntrypoint *entrypoint,
+	VAConfigAttrib *attributes, int *attributes_count);
+VAStatus DumpGetConfigAttributes(VADriverContextP context, VAProfile profile,
+	VAEntrypoint entrypoint, VAConfigAttrib *attributes,
+	int attributes_count);
+VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles,
+	int *profiles_count);
+VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile,
+	VAEntrypoint *entrypoints, int *entrypoints_count);
+VAStatus DumpQueryDisplayAttributes(VADriverContextP context,
+	VADisplayAttribute *attributes, int *attributes_count);
+VAStatus DumpGetDisplayAttributes(VADriverContextP context,
+	VADisplayAttribute *attributes, int attributes_count);
+VAStatus DumpSetDisplayAttributes(VADriverContextP context,
+	VADisplayAttribute *attributes, int attributes_count);
 
 #endif

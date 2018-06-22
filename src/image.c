@@ -23,7 +23,8 @@
 #include "surface.h"
 #include "buffer.h"
 
-VAStatus DumpCreateImage(VADriverContextP context, VAImageFormat *format, int width, int height, VAImage *image)
+VAStatus DumpCreateImage(VADriverContextP context, VAImageFormat *format,
+	int width, int height, VAImage *image)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_image *image_object;
@@ -83,7 +84,8 @@ VAStatus DumpDestroyImage(VADriverContextP context, VAImageID image_id)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id, VAImage *image)
+VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id,
+	VAImage *image)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
@@ -105,7 +107,8 @@ VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id, VAIma
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats, int *formats_count)
+VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats,
+	int *formats_count)
 {
 	formats[0].fourcc = VA_FOURCC_NV12;
 	*formats_count = 1;
@@ -113,17 +116,22 @@ VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats,
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpSetImagePalette(VADriverContextP context, VAImageID image_id, unsigned char *palette)
+VAStatus DumpSetImagePalette(VADriverContextP context, VAImageID image_id,
+	unsigned char *palette)
 {
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpGetImage(VADriverContextP context, VASurfaceID surface_id, int x, int y, unsigned int width, unsigned int height, VAImageID image_id)
+VAStatus DumpGetImage(VADriverContextP context, VASurfaceID surface_id, int x,
+	int y, unsigned int width, unsigned int height, VAImageID image_id)
 {
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpPutImage(VADriverContextP context, VASurfaceID surface_id, VAImageID image, int src_x, int src_y, unsigned int src_width, unsigned int src_height, int dst_x, int dst_y, unsigned int dst_width, unsigned int dst_height)
+VAStatus DumpPutImage(VADriverContextP context, VASurfaceID surface_id,
+	VAImageID image, int src_x, int src_y, unsigned int src_width,
+	unsigned int src_height, int dst_x, int dst_y, unsigned int dst_width,
+	unsigned int dst_height)
 {
 	return VA_STATUS_SUCCESS;
 }

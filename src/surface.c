@@ -23,7 +23,10 @@
 #include "dump.h"
 #include "surface.h"
 
-VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format, unsigned int width, unsigned int height, VASurfaceID *surfaces_ids, unsigned int surfaces_count, VASurfaceAttrib *attributes, unsigned int attributes_count)
+VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format,
+	unsigned int width, unsigned int height, VASurfaceID *surfaces_ids,
+	unsigned int surfaces_count, VASurfaceAttrib *attributes,
+	unsigned int attributes_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
@@ -51,12 +54,14 @@ VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format, unsi
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpCreateSurfaces(VADriverContextP context, int width, int height, int format, int surfaces_count, VASurfaceID *surfaces_ids)
+VAStatus DumpCreateSurfaces(VADriverContextP context, int width, int height,
+	int format, int surfaces_count, VASurfaceID *surfaces_ids)
 {
 	return DumpCreateSurfaces2(context, format, width, height, surfaces_ids, surfaces_count, NULL, 0);
 }
 
-VAStatus DumpDestroySurfaces(VADriverContextP context, VASurfaceID *surfaces_ids, int surfaces_count)
+VAStatus DumpDestroySurfaces(VADriverContextP context,
+	VASurfaceID *surfaces_ids, int surfaces_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
@@ -87,7 +92,8 @@ VAStatus DumpSyncSurface(VADriverContextP context, VASurfaceID surface_id)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQuerySurfaceStatus(VADriverContextP context, VASurfaceID surface_id, VASurfaceStatus *status)
+VAStatus DumpQuerySurfaceStatus(VADriverContextP context,
+	VASurfaceID surface_id, VASurfaceStatus *status)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
@@ -101,7 +107,9 @@ VAStatus DumpQuerySurfaceStatus(VADriverContextP context, VASurfaceID surface_id
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQuerySurfaceAttributes(VADriverContextP context, VAConfigID config_id, VASurfaceAttrib *attributes, unsigned int *attributes_count)
+VAStatus DumpQuerySurfaceAttributes(VADriverContextP context,
+	VAConfigID config_id, VASurfaceAttrib *attributes,
+	unsigned int *attributes_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_config *config_object;
@@ -123,7 +131,9 @@ VAStatus DumpQuerySurfaceAttributes(VADriverContextP context, VAConfigID config_
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpGetSurfaceAttributes(VADriverContextP context, VAConfigID config_id, VASurfaceAttrib *attributes, unsigned int attributes_count)
+VAStatus DumpGetSurfaceAttributes(VADriverContextP context,
+	VAConfigID config_id, VASurfaceAttrib *attributes,
+	unsigned int attributes_count)
 {
 	unsigned int i;
 
@@ -143,7 +153,12 @@ VAStatus DumpGetSurfaceAttributes(VADriverContextP context, VAConfigID config_id
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpPutSurface(VADriverContextP context, VASurfaceID surface_id, void *draw, short src_x, short src_y, unsigned short src_width, unsigned short src_height, short dst_x, short dst_y, unsigned short dst_width, unsigned short dst_height, VARectangle *cliprects, unsigned int cliprects_count, unsigned int flags)
+VAStatus DumpPutSurface(VADriverContextP context, VASurfaceID surface_id,
+	void *draw, short src_x, short src_y, unsigned short src_width,
+	unsigned short src_height, short dst_x, short dst_y,
+	unsigned short dst_width, unsigned short dst_height,
+	VARectangle *cliprects, unsigned int cliprects_count,
+	unsigned int flags)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_surface *surface_object;
@@ -157,7 +172,11 @@ VAStatus DumpPutSurface(VADriverContextP context, VASurfaceID surface_id, void *
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpLockSurface(VADriverContextP context, VASurfaceID surface_id, unsigned int *fourcc, unsigned int *luma_stride, unsigned int *chroma_u_stride, unsigned int *chroma_v_stride, unsigned int *luma_offset, unsigned int *chroma_u_offset, unsigned int *chroma_v_offset, unsigned int *buffer_name, void **buffer)
+VAStatus DumpLockSurface(VADriverContextP context, VASurfaceID surface_id,
+	unsigned int *fourcc, unsigned int *luma_stride,
+	unsigned int *chroma_u_stride, unsigned int *chroma_v_stride,
+	unsigned int *luma_offset, unsigned int *chroma_u_offset,
+	unsigned int *chroma_v_offset, unsigned int *buffer_name, void **buffer)
 {
 	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }

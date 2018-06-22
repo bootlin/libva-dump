@@ -23,7 +23,9 @@
 #include "dump.h"
 #include "buffer.h"
 
-VAStatus DumpCreateBuffer(VADriverContextP context, VAContextID context_id, VABufferType type, unsigned int size, unsigned int count, void *data, VABufferID *buffer_id)
+VAStatus DumpCreateBuffer(VADriverContextP context, VAContextID context_id,
+	VABufferType type, unsigned int size, unsigned int count, void *data,
+	VABufferID *buffer_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_buffer *buffer_object;
@@ -83,7 +85,8 @@ VAStatus DumpDestroyBuffer(VADriverContextP context, VABufferID buffer_id)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpMapBuffer(VADriverContextP context, VABufferID buffer_id, void **data_map)
+VAStatus DumpMapBuffer(VADriverContextP context, VABufferID buffer_id,
+	void **data_map)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_buffer *buffer_object;
@@ -112,7 +115,8 @@ VAStatus DumpUnmapBuffer(VADriverContextP context, VABufferID buffer_id)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id, unsigned int count)
+VAStatus DumpBufferSetNumElements(VADriverContextP context,
+	VABufferID buffer_id, unsigned int count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_buffer *buffer_object;
@@ -129,7 +133,8 @@ VAStatus DumpBufferSetNumElements(VADriverContextP context, VABufferID buffer_id
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpBufferInfo(VADriverContextP context, VABufferID buffer_id, VABufferType *type, unsigned int *size, unsigned int *count)
+VAStatus DumpBufferInfo(VADriverContextP context, VABufferID buffer_id,
+	VABufferType *type, unsigned int *size, unsigned int *count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_buffer *buffer_object;

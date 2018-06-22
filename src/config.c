@@ -20,7 +20,9 @@
 
 #include "config.h"
 
-VAStatus DumpCreateConfig(VADriverContextP context, VAProfile profile, VAEntrypoint entrypoint, VAConfigAttrib *attributes, int attributes_count, VAConfigID *config_id)
+VAStatus DumpCreateConfig(VADriverContextP context, VAProfile profile,
+	VAEntrypoint entrypoint, VAConfigAttrib *attributes,
+	int attributes_count, VAConfigID *config_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_config *config_object;
@@ -91,7 +93,9 @@ VAStatus DumpDestroyConfig(VADriverContextP context, VAConfigID config_id)
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQueryConfigAttributes(VADriverContextP context, VAConfigID config_id, VAProfile *profile, VAEntrypoint *entrypoint, VAConfigAttrib *attributes, int *attributes_count)
+VAStatus DumpQueryConfigAttributes(VADriverContextP context,
+	VAConfigID config_id, VAProfile *profile, VAEntrypoint *entrypoint,
+	VAConfigAttrib *attributes, int *attributes_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_config *config_object;
@@ -118,7 +122,9 @@ VAStatus DumpQueryConfigAttributes(VADriverContextP context, VAConfigID config_i
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpGetConfigAttributes(VADriverContextP context, VAProfile profile, VAEntrypoint entrypoint, VAConfigAttrib *attributes, int attributes_count)
+VAStatus DumpGetConfigAttributes(VADriverContextP context, VAProfile profile,
+	VAEntrypoint entrypoint, VAConfigAttrib *attributes,
+	int attributes_count)
 {
 	unsigned int i;
 
@@ -136,7 +142,8 @@ VAStatus DumpGetConfigAttributes(VADriverContextP context, VAProfile profile, VA
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles, int *profiles_count)
+VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles,
+	int *profiles_count)
 {
 	VAProfile supported_profiles[] = {
 		VAProfileH264ConstrainedBaseline,
@@ -158,7 +165,8 @@ VAStatus DumpQueryConfigProfiles(VADriverContextP context, VAProfile *profiles, 
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile, VAEntrypoint *entrypoints, int *entrypoints_count)
+VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile,
+	VAEntrypoint *entrypoints, int *entrypoints_count)
 {
 	switch (profile) {
 		case VAProfileH264Main:
@@ -191,17 +199,20 @@ VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile,
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpQueryDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int *attributes_count)
+VAStatus DumpQueryDisplayAttributes(VADriverContextP context,
+	VADisplayAttribute *attributes, int *attributes_count)
 {
 	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
-VAStatus DumpGetDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int attributes_count)
+VAStatus DumpGetDisplayAttributes(VADriverContextP context,
+	VADisplayAttribute *attributes, int attributes_count)
 {
 	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
-VAStatus DumpSetDisplayAttributes(VADriverContextP context, VADisplayAttribute *attributes, int attributes_count)
+VAStatus DumpSetDisplayAttributes(VADriverContextP context,
+	VADisplayAttribute *attributes, int attributes_count)
 {
 	return VA_STATUS_ERROR_UNIMPLEMENTED;
 }

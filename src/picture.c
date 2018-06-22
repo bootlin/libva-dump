@@ -32,7 +32,8 @@
 #include "buffer.h"
 #include "header.h"
 
-VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASurfaceID surface_id)
+VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id,
+	VASurfaceID surface_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_context *context_object;
@@ -99,7 +100,8 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASu
 	return VA_STATUS_SUCCESS;
 }
 
-VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id, VABufferID *buffers, int buffers_count)
+VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
+	VABufferID *buffers, int buffers_count)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_context *context_object;

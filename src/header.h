@@ -32,7 +32,8 @@ void h264_slice_parameter_dump(struct dump_driver_data *driver_data,
 void h264_stop_dump(struct dump_driver_data *driver_data);
 
 void mpeg2_start_dump(struct dump_driver_data *driver_data);
-void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterBufferMPEG2 *parameters);
+void mpeg2_header_dump(struct dump_driver_data *driver_data,
+	VAPictureParameterBufferMPEG2 *parameters);
 void mpeg2_stop_dump(struct dump_driver_data *driver_data);
 
 #endif

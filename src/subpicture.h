@@ -20,14 +20,30 @@
 
 #include <va/va_backend.h>
 
-VAStatus DumpCreateSubpicture(VADriverContextP context, VAImageID image_id, VASubpictureID *subpicture_id);
-VAStatus DumpDestroySubpicture(VADriverContextP context, VASubpictureID subpicture_id);
-VAStatus DumpQuerySubpictureFormats(VADriverContextP context, VAImageFormat *formats, unsigned int *flags, unsigned int *formats_count);
-VAStatus DumpSetSubpictureImage(VADriverContextP context, VASubpictureID subpicture_id, VAImageID image_id);
-VAStatus DumpSetSubpicturePalette(VADriverContextP context, VASubpictureID subpicture_id, unsigned char *palette);
-VAStatus DumpSetSubpictureChromakey(VADriverContextP context, VASubpictureID subpicture_id, unsigned int chromakey_min, unsigned int chromakey_max, unsigned int chromakey_mask);
-VAStatus DumpSetSubpictureGlobalAlpha(VADriverContextP ctx, VASubpictureID subpicture, float global_alpha);
-VAStatus DumpAssociateSubpicture(VADriverContextP context, VASubpictureID subpicture_id, VASurfaceID *target_surfaces, int target_surfaces_count, short src_x, short src_y, unsigned short src_width, unsigned short src_height, short dst_x, short dst_y, unsigned short dst_width, unsigned short dst_height, unsigned int flags);
-VAStatus DumpDeassociateSubpicture(VADriverContextP context, VASubpictureID subpicture_id, VASurfaceID *target_surfaces, int target_surfaces_count);
+VAStatus DumpCreateSubpicture(VADriverContextP context, VAImageID image_id,
+	VASubpictureID *subpicture_id);
+VAStatus DumpDestroySubpicture(VADriverContextP context,
+	VASubpictureID subpicture_id);
+VAStatus DumpQuerySubpictureFormats(VADriverContextP context,
+	VAImageFormat *formats, unsigned int *flags,
+	unsigned int *formats_count);
+VAStatus DumpSetSubpictureImage(VADriverContextP context,
+	VASubpictureID subpicture_id, VAImageID image_id);
+VAStatus DumpSetSubpicturePalette(VADriverContextP context,
+	VASubpictureID subpicture_id, unsigned char *palette);
+VAStatus DumpSetSubpictureChromakey(VADriverContextP context,
+	VASubpictureID subpicture_id, unsigned int chromakey_min,
+	unsigned int chromakey_max, unsigned int chromakey_mask);
+VAStatus DumpSetSubpictureGlobalAlpha(VADriverContextP ctx,
+	VASubpictureID subpicture, float global_alpha);
+VAStatus DumpAssociateSubpicture(VADriverContextP context,
+	VASubpictureID subpicture_id, VASurfaceID *target_surfaces,
+	int target_surfaces_count, short src_x, short src_y,
+	unsigned short src_width, unsigned short src_height, short dst_x,
+	short dst_y, unsigned short dst_width, unsigned short dst_height,
+	unsigned int flags);
+VAStatus DumpDeassociateSubpicture(VADriverContextP context,
+	VASubpictureID subpicture_id, VASurfaceID *target_surfaces,
+	int target_surfaces_count);
 
 #endif

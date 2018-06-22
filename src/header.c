@@ -343,7 +343,8 @@ void mpeg2_stop_dump(struct dump_driver_data *driver_data)
 	print_indent(1, "},\n");
 }
 
-void mpeg2_header_dump(struct dump_driver_data *driver_data, VAPictureParameterBufferMPEG2 *parameters)
+void mpeg2_header_dump(struct dump_driver_data *driver_data,
+	VAPictureParameterBufferMPEG2 *parameters)
 {
 	struct object_surface *surface_object;
 	char *slice_type;

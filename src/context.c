@@ -22,7 +22,9 @@
 #include "context.h"
 #include "config.h"
 
-VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id, int picture_width, int picture_height, int flag, VASurfaceID *surfaces_ids, int surfaces_count, VAContextID *context_id)
+VAStatus DumpCreateContext(VADriverContextP context, VAConfigID config_id,
+	int picture_width, int picture_height, int flag,
+	VASurfaceID *surfaces_ids, int surfaces_count, VAContextID *context_id)
 {
 	struct dump_driver_data *driver_data = (struct dump_driver_data *) context->pDriverData;
 	struct object_config *config_object;

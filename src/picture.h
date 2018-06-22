@@ -22,8 +22,10 @@
 
 #include "object_heap.h"
 
-VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id, VASurfaceID surface_id);
-VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id, VABufferID *buffers, int buffers_count);
+VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id,
+	VASurfaceID surface_id);
+VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
+	VABufferID *buffers, int buffers_count);
 VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id);
 
 #endif

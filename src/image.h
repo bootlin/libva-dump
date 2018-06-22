@@ -41,12 +41,20 @@ struct object_image {
  * Functions
  */
 
-VAStatus DumpCreateImage(VADriverContextP context, VAImageFormat *format, int width, int height, VAImage *image);
+VAStatus DumpCreateImage(VADriverContextP context, VAImageFormat *format,
+	int width, int height, VAImage *image);
 VAStatus DumpDestroyImage(VADriverContextP context, VAImageID image_id);
-VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id, VAImage *image);
-VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats, int *formats_count);
-VAStatus DumpSetImagePalette(VADriverContextP context, VAImageID image_id, unsigned char *palette);
-VAStatus DumpGetImage(VADriverContextP context, VASurfaceID surface_id, int x, int y, unsigned int width, unsigned int height, VAImageID image_id);
-VAStatus DumpPutImage(VADriverContextP context, VASurfaceID surface_id, VAImageID image, int src_x, int src_y, unsigned int src_width, unsigned int src_height, int dst_x, int dst_y, unsigned int dst_width, unsigned int dst_height);
+VAStatus DumpDeriveImage(VADriverContextP context, VASurfaceID surface_id,
+	VAImage *image);
+VAStatus DumpQueryImageFormats(VADriverContextP context, VAImageFormat *formats,
+	int *formats_count);
+VAStatus DumpSetImagePalette(VADriverContextP context, VAImageID image_id,
+	unsigned char *palette);
+VAStatus DumpGetImage(VADriverContextP context, VASurfaceID surface_id, int x,
+	int y, unsigned int width, unsigned int height, VAImageID image_id);
+VAStatus DumpPutImage(VADriverContextP context, VASurfaceID surface_id,
+	VAImageID image, int src_x, int src_y, unsigned int src_width,
+	unsigned int src_height, int dst_x, int dst_y, unsigned int dst_width,
+	unsigned int dst_height);
 
 #endif
