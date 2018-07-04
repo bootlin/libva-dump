@@ -226,32 +226,6 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 	VASliceParameterBufferH264 *parameters = &driver_data->slice;
 	int i;
 
-	print_indent(indent++, ".pred_weight = {\n");
-	print_indent(indent, ".chroma_log2_weight_denom = %u,\n",
-		     parameters->chroma_log2_weight_denom);
-	print_indent(indent, ".luma_log2_weight_denom = %u,\n",
-		     parameters->luma_log2_weight_denom);
-
-	print_indent(indent, ".weight_factors = {\n");
-	for (i = 0; i < 2; i++) {
-		print_indent(5, "{\n");
-		print_s16_array(6, "luma_weight",
-				i ? parameters->luma_weight_l1 : parameters->luma_weight_l0,
-				32);
-		print_s16_array(6, "luma_offset",
-				i ? parameters->luma_offset_l1 : parameters->luma_offset_l0,
-				32);
-		print_s16_matrix(6, "chroma_weight",
-				 i ? (int16_t*)&parameters->chroma_weight_l1 : (int16_t*)&parameters->chroma_weight_l0,
-				 32, 2);
-		print_s16_matrix(6, "chroma_offset",
-				 i ? (int16_t*)parameters->chroma_offset_l1 : (int16_t*)parameters->chroma_offset_l0,
-				 32, 2);
-		print_indent(5, "},\n");
-	}
-	print_indent(indent, "},\n");
-	print_indent(--indent, "},\n");
-
 	print_indent(indent++, ".slice = {\n");
 	print_indent(indent, ".size = %u,\n", parameters->slice_data_size);
 	print_indent(indent, ".header_bit_size = %u,\n", parameters->slice_data_bit_offset);
@@ -284,6 +258,32 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 
 	if (parameters->direct_spatial_mv_pred_flag)
 		print_indent(indent, ".flags = V4L2_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED,\n");
+
+	print_indent(indent++, ".pred_weight_table = {\n");
+	print_indent(indent, ".chroma_log2_weight_denom = %u,\n",
+		     parameters->chroma_log2_weight_denom);
+	print_indent(indent, ".luma_log2_weight_denom = %u,\n",
+		     parameters->luma_log2_weight_denom);
+
+	print_indent(indent, ".weight_factors = {\n");
+	for (i = 0; i < 2; i++) {
+		print_indent(5, "{\n");
+		print_s16_array(6, "luma_weight",
+				i ? parameters->luma_weight_l1 : parameters->luma_weight_l0,
+				32);
+		print_s16_array(6, "luma_offset",
+				i ? parameters->luma_offset_l1 : parameters->luma_offset_l0,
+				32);
+		print_s16_matrix(6, "chroma_weight",
+				 i ? (int16_t*)&parameters->chroma_weight_l1 : (int16_t*)&parameters->chroma_weight_l0,
+				 32, 2);
+		print_s16_matrix(6, "chroma_offset",
+				 i ? (int16_t*)parameters->chroma_offset_l1 : (int16_t*)parameters->chroma_offset_l0,
+				 32, 2);
+		print_indent(5, "},\n");
+	}
+	print_indent(indent, "},\n");
+	print_indent(--indent, "},\n");
 
 	print_indent(--indent, "},\n");
 }
