@@ -132,7 +132,7 @@ static void h264_emit_picture_parameter(struct dump_driver_data *driver_data,
 {
 	VAPictureParameterBufferH264 *parameters = &driver_data->picture;
 
-	print_indent(indent++, ".decode = {\n");
+	print_indent(indent++, ".decode_param = {\n");
 	print_indent(indent, ".top_field_order_cnt = %d,\n",
 		     parameters->CurrPic.TopFieldOrderCnt);
 	print_indent(indent, ".bottom_field_order_cnt = %d,\n",
@@ -226,7 +226,7 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 	VASliceParameterBufferH264 *parameters = &driver_data->slice;
 	int i;
 
-	print_indent(indent++, ".slice = {\n");
+	print_indent(indent++, ".slice_param = {\n");
 	print_indent(indent, ".size = %u,\n", parameters->slice_data_size);
 	print_indent(indent, ".header_bit_size = %u,\n", parameters->slice_data_bit_offset);
 	print_indent(indent, ".first_mb_in_slice = %u,\n", parameters->first_mb_in_slice);
