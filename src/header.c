@@ -236,11 +236,11 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 	print_indent(indent, ".disable_deblocking_filter_idc = %u,\n", parameters->disable_deblocking_filter_idc);
 	print_indent(indent, ".slice_alpha_c0_offset_div2 = %d,\n", parameters->slice_alpha_c0_offset_div2);
 	print_indent(indent, ".slice_beta_offset_div2 = %d,\n", parameters->slice_beta_offset_div2);
-	print_indent(indent, ".num_ref_idx_l0_active_minus1 = %u,\n", parameters->num_ref_idx_l0_active_minus1);
-	print_indent(indent, ".num_ref_idx_l1_active_minus1 = %u,\n", parameters->num_ref_idx_l1_active_minus1);
 
 	if (((parameters->slice_type % 5) == H264_SLICE_P) ||
 	    ((parameters->slice_type % 5) == H264_SLICE_B)) {
+		print_indent(indent, ".num_ref_idx_l0_active_minus1 = %u,\n",
+			     parameters->num_ref_idx_l0_active_minus1);
 		print_indent(indent, ".ref_pic_list0 = { ");
 		for (i = 0; i < parameters->num_ref_idx_l0_active_minus1 + 1; i++)
 			printf(" %u, ", h264_lookup_ref_pic(driver_data,
@@ -249,6 +249,8 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 	}
 
 	if ((parameters->slice_type % 5) == H264_SLICE_B) {
+		print_indent(indent, ".num_ref_idx_l1_active_minus1 = %u,\n",
+			     parameters->num_ref_idx_l1_active_minus1);
 		print_indent(indent, ".ref_pic_list1 = { ");
 		for (i = 0; i < parameters->num_ref_idx_l1_active_minus1 + 1; i++)
 			printf(" %u, ", h264_lookup_ref_pic(driver_data,
