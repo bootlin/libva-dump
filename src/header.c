@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <limits.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -83,6 +85,155 @@ static void print_s16_matrix(unsigned indent, const char *name,
 	print_indent(indent, "},\n", name);
 }
 
+#define DPB_SIZE	16
+
+struct dpb_entry {
+	VAPictureH264	pic;
+	unsigned int	age;
+	bool		used;
+	bool		valid;
+	bool		reserved;
+};
+
+struct dpb {
+	struct dpb_entry	entries[DPB_SIZE];
+	unsigned int		age;
+};
+
+static struct dpb local_dpb;
+
+static struct dpb_entry *find_invalid_dpb_entry()
+{
+	unsigned int i;
+
+	for (i = 0; i < DPB_SIZE; i++) {
+		struct dpb_entry *entry = &local_dpb.entries[i];
+
+		if (!entry->valid && !entry->reserved)
+			return entry;
+	}
+
+	return NULL;
+}
+
+static struct dpb_entry *find_oldest_unused_dpb_entry()
+{
+	unsigned int min_age = UINT_MAX;
+	unsigned int i;
+	struct dpb_entry *match = NULL;
+
+	for (i = 0; i < DPB_SIZE; i++) {
+		struct dpb_entry *entry = &local_dpb.entries[i];
+
+		if (!entry->used && (entry->age < min_age)) {
+			min_age = entry->age;
+			match = entry;
+		}
+	}
+
+	return match;
+}
+
+static struct dpb_entry *find_dpb_entry()
+{
+	struct dpb_entry *entry;
+
+	entry = find_invalid_dpb_entry();
+	if (!entry)
+		entry = find_oldest_unused_dpb_entry();
+
+	return entry;
+}
+
+static int dpb_find_entry_index(struct dpb_entry *entry)
+{
+	return entry - &local_dpb.entries[0];
+}
+
+static struct dpb_entry *dpb_lookup(VAPictureH264 *pic, unsigned int *idx)
+{
+	unsigned int i;
+
+	for (i = 0; i < DPB_SIZE; i++) {
+		struct dpb_entry *entry = &local_dpb.entries[i];
+
+		if (!entry->valid)
+			continue;
+
+		if (entry->pic.picture_id == pic->picture_id) {
+			if (idx)
+				*idx = i;
+
+			return entry;
+		}
+	}
+
+	return NULL;
+}
+
+static bool is_pic_null(VAPictureH264 *pic)
+{
+	return !pic->frame_idx && !pic->TopFieldOrderCnt &&
+		!pic->BottomFieldOrderCnt;
+}
+
+static void clear_dpb_entry(struct dpb_entry *entry, bool reserved)
+{
+	memset(entry, 0, sizeof(*entry));
+
+	if (reserved)
+		entry->reserved = true;
+}
+
+static void insert_in_dpb(VAPictureH264 *pic, struct dpb_entry *entry)
+{
+	if (is_pic_null(pic))
+		return;
+
+	if (dpb_lookup(pic, NULL))
+		return;
+
+	if (!entry)
+		entry = find_dpb_entry();
+
+	memcpy(&entry->pic, pic, sizeof(entry->pic));
+	entry->age = local_dpb.age;
+	entry->valid = true;
+	entry->reserved = false;
+
+	if (!(pic->flags & VA_PICTURE_H264_INVALID))
+		entry->used = true;
+}
+
+static void update_dpb(VAPictureParameterBufferH264 *parameters)
+{
+	unsigned int i;
+
+	local_dpb.age++;
+
+	for (i = 0; i < DPB_SIZE; i++) {
+		struct dpb_entry *entry = &local_dpb.entries[i];
+
+		entry->used = false;
+	}
+
+	for (i = 0; i < parameters->num_ref_frames; i++) {
+		VAPictureH264 *pic = &parameters->ReferenceFrames[i];
+		struct dpb_entry *entry;
+
+		if (is_pic_null(pic))
+			continue;
+
+		entry = dpb_lookup(pic, NULL);
+		if (entry) {
+			entry->age = local_dpb.age;
+			entry->used = true;
+		} else {
+			insert_in_dpb(pic, NULL);
+		}
+	}
+}
+
 void h264_start_dump(struct dump_driver_data *driver_data) { }
 
 static void h264_dump_dpb(struct dump_driver_data *driver_data,
@@ -93,38 +244,31 @@ static void h264_dump_dpb(struct dump_driver_data *driver_data,
 
 	print_indent(indent++, ".dpb = {\n");
 
-	for (i = 0; i < parameters->num_ref_frames; i++) {
-		VAPictureH264 *pic = &parameters->ReferenceFrames[i];
+	for (i = 0; i < DPB_SIZE; i++) {
+		struct dpb_entry *entry = &local_dpb.entries[i];
+		VAPictureH264 *pic = &entry->pic;
 
-		print_indent(indent++, "{\n");
+		if (!entry->valid)
+			continue;
+
+		print_indent(indent++, "[%d] = {\n", i);
+
 		print_indent(indent, ".frame_num = %d,\n", pic->frame_idx);
+		print_indent(indent, ".buf_index = %d,\n",
+			     dpb_find_entry_index(entry));
 		print_indent(indent, ".top_field_order_cnt = %d,\n",
 			     pic->TopFieldOrderCnt);
 		print_indent(indent, ".bottom_field_order_cnt = %d,\n",
 			     pic->BottomFieldOrderCnt);
-		print_indent(indent, ".flags = %s | %s,\n",
+		print_indent(indent, ".flags = %s | %s | %s,\n",
+			     "V4L2_H264_DPB_ENTRY_FLAG_VALID",
 			     pic->flags & VA_PICTURE_H264_LONG_TERM_REFERENCE ?
 			     "V4L2_H264_DPB_ENTRY_FLAG_LONG_TERM" : "0",
-			     !(pic->flags & VA_PICTURE_H264_INVALID) ?
+			     entry->used ?
 			     "V4L2_H264_DPB_ENTRY_FLAG_ACTIVE" : "0");
 		print_indent(--indent, "},\n");
 	}
 	print_indent(--indent, "},\n");
-}
-
-static int h264_lookup_ref_pic(struct dump_driver_data *driver_data,
-			       unsigned int frame_num)
-{
-	int i;
-
-	for (i = 0; i < driver_data->picture.num_ref_frames; i++) {
-		VAPictureH264 *pic = &driver_data->picture.ReferenceFrames[i];
-
-		if (frame_num == pic->frame_idx)
-			return i;
-	}
-
-	return -22;
 }
 
 static void h264_emit_picture_parameter(struct dump_driver_data *driver_data,
@@ -242,9 +386,14 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 		print_indent(indent, ".num_ref_idx_l0_active_minus1 = %u,\n",
 			     parameters->num_ref_idx_l0_active_minus1);
 		print_indent(indent, ".ref_pic_list0 = { ");
-		for (i = 0; i < parameters->num_ref_idx_l0_active_minus1 + 1; i++)
-			printf(" %u, ", h264_lookup_ref_pic(driver_data,
-							    parameters->RefPicList0[i].frame_idx));
+		for (i = 0; i < parameters->num_ref_idx_l0_active_minus1 + 1; i++) {
+			VAPictureH264 *pic = &parameters->RefPicList0[i];
+			struct dpb_entry *entry;
+			unsigned int idx = 0;
+
+			entry = dpb_lookup(pic, &idx);
+			printf(" %u, ", entry ? idx : 0);
+		}
 		printf("},\n");
 	}
 
@@ -252,14 +401,19 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 		print_indent(indent, ".num_ref_idx_l1_active_minus1 = %u,\n",
 			     parameters->num_ref_idx_l1_active_minus1);
 		print_indent(indent, ".ref_pic_list1 = { ");
-		for (i = 0; i < parameters->num_ref_idx_l1_active_minus1 + 1; i++)
-			printf(" %u, ", h264_lookup_ref_pic(driver_data,
-							    parameters->RefPicList1[i].frame_idx));
+		for (i = 0; i < parameters->num_ref_idx_l1_active_minus1 + 1; i++) {
+			VAPictureH264 *pic = &parameters->RefPicList1[i];
+			struct dpb_entry *entry;
+			unsigned int idx = 0;
+
+			entry = dpb_lookup(pic, &idx);
+			printf(" %u, ", entry ? idx : 0);
+		}
 		printf("},\n");
 	}
 
 	if (parameters->direct_spatial_mv_pred_flag)
-		print_indent(indent, ".flags = V4L2_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED,\n");
+		print_indent(indent, ".flags = V4L2_H264_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED,\n");
 
 	print_indent(indent++, ".pred_weight_table = {\n");
 	print_indent(indent, ".chroma_log2_weight_denom = %u,\n",
@@ -292,11 +446,22 @@ static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 
 static void h264_emit_frame(struct dump_driver_data *driver_data)
 {
+	struct dpb_entry *output;
 	unsigned int index = driver_data->frame_index;
 	unsigned int indent = 1;
 
+	output = dpb_lookup(&driver_data->picture.CurrPic, NULL);
+	if (!output)
+		output = find_dpb_entry();
+
+	clear_dpb_entry(output, true);
+
+	update_dpb(&driver_data->picture);
+
 	print_indent(indent++, "{\n");
 	print_indent(indent, ".index = %d,\n", index);
+	print_indent(indent, ".output_buffer = %d,\n",
+		     dpb_find_entry_index(output));
 	print_indent(indent++, ".frame.h264 = {\n");
 
 	h264_emit_picture_parameter(driver_data, indent);
@@ -305,6 +470,8 @@ static void h264_emit_frame(struct dump_driver_data *driver_data)
 
 	print_indent(--indent, "},\n");
 	print_indent(--indent, "},\n");
+
+	insert_in_dpb(&driver_data->picture.CurrPic, output);
 }
 
 void h264_stop_dump(struct dump_driver_data *driver_data)
