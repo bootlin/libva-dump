@@ -503,7 +503,7 @@ void mpeg2_start_dump(struct dump_driver_data *driver_data)
 
 	print_indent(1, "{\n");
 	print_indent(2, ".index = %d,\n", index);
-	print_indent(2, ".frame.mpeg2.header = {\n");
+	print_indent(2, ".frame.mpeg2.slice_params = {\n");
 }
 
 void mpeg2_stop_dump(struct dump_driver_data *driver_data)
@@ -522,15 +522,15 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data,
 	unsigned int index = driver_data->frame_index;
 
 	if (parameters->picture_coding_type == 1)
-		slice_type = "V4L2_SLICE_PCT_I";
+		slice_type = "V4L2_MPEG2_SLICE_TYPE_I";
 	else if (parameters->picture_coding_type == 2)
-		slice_type = "V4L2_SLICE_PCT_P";
+		slice_type = "V4L2_MPEG2_SLICE_TYPE_P";
 	else if (parameters->picture_coding_type == 3)
-		slice_type = "V4L2_SLICE_PCT_B";
+		slice_type = "V4L2_MPEG2_SLICE_TYPE_B";
 	else
-		slice_type = "V4L2_SLICE_PCT_INVALID";
+		slice_type = "V4L2_MPEG2_SLICE_TYPE_INVALID";
 
-	print_indent(3, ".picture_coding_type = %s,\n", slice_type);
+	print_indent(3, ".slice_type = %s,\n", slice_type);
 	print_indent(3, ".f_code = { %d, %d, %d, %d },\n",
 		     (parameters->f_code >> 12) & 0xf,
 		     (parameters->f_code >> 8) & 0xf,
