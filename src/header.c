@@ -56,16 +56,30 @@ static void print_u8_matrix(unsigned indent, const char *name,
 {
 	int i;
 
-	print_indent(indent, ".%s = {\n", name);
+	print_indent(indent, ".%s = {", name);
+
+	if (x > 1)
+		printf("\n");
+	else
+		printf(" ");
+
 	for (i = 0; i < x; i++) {
 		int j;
 
-		print_indent(indent + 1, "{ ", i);
+		if (x > 1)
+			print_indent(indent + 1, "{ ");
+
 		for (j = 0; j < y; j++)
 			printf("%u, ", *(array + i * y + j));
-		printf("},\n");
+
+		if (x > 1)
+			printf("},\n");
 	}
-	print_indent(indent, "},\n", name);
+
+	if (x > 1)
+		print_indent(indent, "},\n", name);
+	else
+		printf("},\n");
 }
 
 static void print_s16_matrix(unsigned indent, const char *name,
@@ -503,12 +517,10 @@ void mpeg2_start_dump(struct dump_driver_data *driver_data)
 
 	print_indent(1, "{\n");
 	print_indent(2, ".index = %d,\n", index);
-	print_indent(2, ".frame.mpeg2.slice_params = {\n");
 }
 
 void mpeg2_stop_dump(struct dump_driver_data *driver_data)
 {
-	print_indent(2, "},\n");
 	print_indent(1, "},\n");
 }
 
@@ -520,6 +532,8 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data,
 	unsigned int forward_reference_index;
 	unsigned int backward_reference_index;
 	unsigned int index = driver_data->frame_index;
+
+	print_indent(2, ".frame.mpeg2.slice_params = {\n");
 
 	if (parameters->picture_coding_type == 1)
 		slice_type = "V4L2_MPEG2_SLICE_TYPE_I";
@@ -568,4 +582,36 @@ void mpeg2_header_dump(struct dump_driver_data *driver_data,
 		backward_reference_index = index;
 
 	print_indent(3, ".backward_ref_index = %d,\n", backward_reference_index);
+
+	print_indent(2, "},\n");
+}
+
+void mpeg2_quantization_matrix_dump(struct dump_driver_data *driver_data,
+				    VAIQMatrixBufferMPEG2 *parameters)
+{
+	print_indent(2, ".frame.mpeg2.quantization = {\n");
+
+	print_indent(3, ".load_luma_intra_quantiser_matrix = %d,\n",
+		     parameters->load_intra_quantiser_matrix);
+	print_indent(3, ".load_luma_non_intra_quantiser_matrix = %d,\n",
+		     parameters->load_non_intra_quantiser_matrix);
+	print_indent(3, ".load_chroma_intra_quantiser_matrix = %d,\n",
+		     parameters->load_chroma_intra_quantiser_matrix);
+	print_indent(3, ".load_chroma_non_intra_quantiser_matrix = %d,\n",
+		     parameters->load_chroma_non_intra_quantiser_matrix);
+
+	print_u8_matrix(3, "luma_intra_quantiser_matrix",
+			(uint8_t *) &parameters->intra_quantiser_matrix,
+			1, 64);
+	print_u8_matrix(3, "luma_non_intra_quantiser_matrix",
+			(uint8_t *) &parameters->non_intra_quantiser_matrix,
+			1, 64);
+	print_u8_matrix(3, "chroma_intra_quantiser_matrix",
+			(uint8_t *) &parameters->chroma_intra_quantiser_matrix,
+			1, 64);
+	print_u8_matrix(3, "chroma_non_intra_quantiser_matrix",
+			(uint8_t *) &parameters->chroma_non_intra_quantiser_matrix,
+			1, 64);
+
+	print_indent(2, "},\n");
 }

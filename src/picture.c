@@ -168,6 +168,10 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 			}
 		} else if (buffer_object->type == VAIQMatrixBufferType) {
 			switch (config_object->profile) {
+				case VAProfileMPEG2Simple:
+				case VAProfileMPEG2Main:
+					mpeg2_quantization_matrix_dump(driver_data, (VAIQMatrixBufferMPEG2 *) buffer_object->data);
+					break;
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
