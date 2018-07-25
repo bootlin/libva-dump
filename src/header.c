@@ -591,19 +591,19 @@ void mpeg2_quantization_matrix_dump(struct dump_driver_data *driver_data,
 {
 	print_indent(2, ".frame.mpeg2.quantization = {\n");
 
-	print_indent(3, ".load_luma_intra_quantiser_matrix = %d,\n",
+	print_indent(3, ".load_intra_quantiser_matrix = %d,\n",
 		     parameters->load_intra_quantiser_matrix);
-	print_indent(3, ".load_luma_non_intra_quantiser_matrix = %d,\n",
+	print_indent(3, ".load_non_intra_quantiser_matrix = %d,\n",
 		     parameters->load_non_intra_quantiser_matrix);
 	print_indent(3, ".load_chroma_intra_quantiser_matrix = %d,\n",
 		     parameters->load_chroma_intra_quantiser_matrix);
 	print_indent(3, ".load_chroma_non_intra_quantiser_matrix = %d,\n",
 		     parameters->load_chroma_non_intra_quantiser_matrix);
 
-	print_u8_matrix(3, "luma_intra_quantiser_matrix",
+	print_u8_matrix(3, "intra_quantiser_matrix",
 			(uint8_t *) &parameters->intra_quantiser_matrix,
 			1, 64);
-	print_u8_matrix(3, "luma_non_intra_quantiser_matrix",
+	print_u8_matrix(3, "non_intra_quantiser_matrix",
 			(uint8_t *) &parameters->non_intra_quantiser_matrix,
 			1, 64);
 	print_u8_matrix(3, "chroma_intra_quantiser_matrix",
