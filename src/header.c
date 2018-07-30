@@ -288,7 +288,7 @@ static void h264_dump_dpb(struct dump_driver_data *driver_data,
 static void h264_emit_picture_parameter(struct dump_driver_data *driver_data,
 					unsigned int indent)
 {
-	VAPictureParameterBufferH264 *parameters = &driver_data->picture;
+	VAPictureParameterBufferH264 *parameters = &driver_data->h264_picture;
 
 	print_indent(indent++, ".decode_param = {\n");
 	print_indent(indent, ".top_field_order_cnt = %d,\n",
@@ -363,7 +363,7 @@ static void h264_emit_picture_parameter(struct dump_driver_data *driver_data,
 static void h264_emit_quantization_matrix(struct dump_driver_data *driver_data,
 					  unsigned int indent)
 {
-	VAIQMatrixBufferH264 *parameters = &driver_data->matrix;
+	VAIQMatrixBufferH264 *parameters = &driver_data->h264_matrix;
 
 	print_indent(indent++, ".scaling_matrix = {\n");
 	print_u8_matrix(indent, "scaling_list_4x4",
@@ -381,7 +381,7 @@ static void h264_emit_quantization_matrix(struct dump_driver_data *driver_data,
 static void h264_emit_slice_parameter(struct dump_driver_data *driver_data,
 				      unsigned int indent)
 {
-	VASliceParameterBufferH264 *parameters = &driver_data->slice;
+	VASliceParameterBufferH264 *parameters = &driver_data->h264_slice;
 	int i;
 
 	print_indent(indent++, ".slice_param = {\n");
@@ -464,13 +464,13 @@ static void h264_emit_frame(struct dump_driver_data *driver_data)
 	unsigned int index = driver_data->frame_index;
 	unsigned int indent = 1;
 
-	output = dpb_lookup(&driver_data->picture.CurrPic, NULL);
+	output = dpb_lookup(&driver_data->h264_picture.CurrPic, NULL);
 	if (!output)
 		output = find_dpb_entry();
 
 	clear_dpb_entry(output, true);
 
-	update_dpb(&driver_data->picture);
+	update_dpb(&driver_data->h264_picture);
 
 	print_indent(indent++, "{\n");
 	print_indent(indent, ".index = %d,\n", index);
@@ -485,7 +485,7 @@ static void h264_emit_frame(struct dump_driver_data *driver_data)
 	print_indent(--indent, "},\n");
 	print_indent(--indent, "},\n");
 
-	insert_in_dpb(&driver_data->picture.CurrPic, output);
+	insert_in_dpb(&driver_data->h264_picture.CurrPic, output);
 }
 
 void h264_stop_dump(struct dump_driver_data *driver_data)
@@ -496,19 +496,19 @@ void h264_stop_dump(struct dump_driver_data *driver_data)
 void h264_quantization_matrix_dump(struct dump_driver_data *driver_data,
 				   VAIQMatrixBufferH264 *parameters)
 {
-	memcpy(&driver_data->matrix, parameters, sizeof(*parameters));
+	memcpy(&driver_data->h264_matrix, parameters, sizeof(*parameters));
 }
 
 void h264_picture_parameter_dump(struct dump_driver_data *driver_data,
 				 VAPictureParameterBufferH264 *parameters)
 {
-	memcpy(&driver_data->picture, parameters, sizeof(*parameters));
+	memcpy(&driver_data->h264_picture, parameters, sizeof(*parameters));
 }
 
 void h264_slice_parameter_dump(struct dump_driver_data *driver_data,
 			       VASliceParameterBufferH264 *parameters)
 {
-	memcpy(&driver_data->slice, parameters, sizeof(*parameters));
+	memcpy(&driver_data->h264_slice, parameters, sizeof(*parameters));
 }
 
 void mpeg2_start_dump(struct dump_driver_data *driver_data)
