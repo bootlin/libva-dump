@@ -44,12 +44,7 @@ VAStatus DumpCreateConfig(VADriverContextP context, VAProfile profile,
 			if (entrypoint != VAEntrypointVLD)
 				return VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
 			break;
-		case VAProfileMPEG4Simple:
-		case VAProfileMPEG4AdvancedSimple:
-		case VAProfileMPEG4Main:
-			if (entrypoint != VAEntrypointVLD)
-				return VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
-			break;
+
 		default:
 			return VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
 	}
@@ -180,13 +175,6 @@ VAStatus DumpQueryConfigEntrypoints(VADriverContextP context, VAProfile profile,
 
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
-			entrypoints[0] = VAEntrypointVLD;
-			*entrypoints_count = 1;
-			break;
-
-		case VAProfileMPEG4Simple:
-		case VAProfileMPEG4AdvancedSimple:
-		case VAProfileMPEG4Main:
 			entrypoints[0] = VAEntrypointVLD;
 			*entrypoints_count = 1;
 			break;
