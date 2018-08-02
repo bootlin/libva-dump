@@ -5,7 +5,7 @@ backend_ldflags = -module -avoid-version -no-undefined -Wl,--no-undefined
 backend_libs = -lpthread -ldl $(DRM_LIBS) $(LIBVA_DEPS_LIBS)
 
 backend_c = dump.c object_heap.c config.c surface.c context.c buffer.c \
-	header.c picture.c subpicture.c image.c
+	header.c header_mpeg2.c header_h264.c picture.c subpicture.c image.c
 
 backend_h = dump.h object_heap.h config.h surface.h context.h buffer.h \
 	header.h picture.h subpicture.h image.h

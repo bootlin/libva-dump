@@ -84,12 +84,12 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id,
 		case VAProfileH264ConstrainedBaseline:
 		case VAProfileH264MultiviewHigh:
 		case VAProfileH264StereoHigh:
-			h264_start_dump(driver_data);
+			h264_dump_prepare(driver_data);
 			break;
 
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
-			mpeg2_start_dump(driver_data);
+			mpeg2_dump_prepare(driver_data);
 			break;
 
 		default:
@@ -143,8 +143,9 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 				case VAProfileH264ConstrainedBaseline:
 				case VAProfileH264MultiviewHigh:
 				case VAProfileH264StereoHigh:
-					h264_slice_parameter_dump(driver_data,
-								  buffer_object->data);
+					memcpy(&driver_data->params.h264.slice,
+					       buffer_object->data,
+					       sizeof(driver_data->params.h264.slice));
 					break;
 			default:
 				break;
@@ -153,15 +154,18 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 			switch (config_object->profile) {
 				case VAProfileMPEG2Simple:
 				case VAProfileMPEG2Main:
-					mpeg2_header_dump(driver_data, (VAPictureParameterBufferMPEG2 *) buffer_object->data);
+					memcpy(&driver_data->params.mpeg2.picture,
+					       buffer_object->data,
+					       sizeof(driver_data->params.mpeg2.picture));
 					break;
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
 				case VAProfileH264MultiviewHigh:
 				case VAProfileH264StereoHigh:
-					h264_picture_parameter_dump(driver_data,
-								    buffer_object->data);
+					memcpy(&driver_data->params.h264.picture,
+					       buffer_object->data,
+					       sizeof(driver_data->params.h264.picture));
 					break;
 				default:
 					break;
@@ -170,15 +174,18 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 			switch (config_object->profile) {
 				case VAProfileMPEG2Simple:
 				case VAProfileMPEG2Main:
-					mpeg2_quantization_matrix_dump(driver_data, (VAIQMatrixBufferMPEG2 *) buffer_object->data);
+					memcpy(&driver_data->params.mpeg2.quantization,
+					       buffer_object->data,
+					       sizeof(driver_data->params.mpeg2.quantization));
 					break;
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
 				case VAProfileH264MultiviewHigh:
 				case VAProfileH264StereoHigh:
-					h264_quantization_matrix_dump(driver_data,
-								      buffer_object->data);
+					memcpy(&driver_data->params.h264.quantization,
+					       buffer_object->data,
+					       sizeof(driver_data->params.h264.quantization));
 					break;
 			default:
 				break;
@@ -218,12 +225,12 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 			case VAProfileH264ConstrainedBaseline:
 			case VAProfileH264MultiviewHigh:
 			case VAProfileH264StereoHigh:
-				h264_stop_dump(driver_data);
+				h264_dump_header(driver_data);
 				break;
 
 			case VAProfileMPEG2Simple:
 			case VAProfileMPEG2Main:
-				mpeg2_stop_dump(driver_data);
+				mpeg2_dump_header(driver_data);
 				break;
 
 			default:

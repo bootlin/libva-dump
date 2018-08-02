@@ -22,20 +22,18 @@
 
 #include "dump.h"
 
-void h264_start_dump(struct dump_driver_data *driver_data);
-void h264_picture_parameter_dump(struct dump_driver_data *driver_data,
-				 VAPictureParameterBufferH264 *parameters);
-void h264_quantization_matrix_dump(struct dump_driver_data *driver_data,
-				   VAIQMatrixBufferH264 *parameters);
-void h264_slice_parameter_dump(struct dump_driver_data *driver_data,
-			       VASliceParameterBufferH264 *parameters);
-void h264_stop_dump(struct dump_driver_data *driver_data);
+void print_indent(unsigned indent, const char *fmt, ...);
+void print_s16_array(unsigned indent, const char *name,
+		     short *array, unsigned x);
+void print_u8_matrix(unsigned indent, const char *name,
+		     unsigned char *array, unsigned x, unsigned y);
+void print_s16_matrix(unsigned indent, const char *name,
+		      short *array, unsigned x, unsigned y);
 
-void mpeg2_start_dump(struct dump_driver_data *driver_data);
-void mpeg2_header_dump(struct dump_driver_data *driver_data,
-	VAPictureParameterBufferMPEG2 *parameters);
-void mpeg2_quantization_matrix_dump(struct dump_driver_data *driver_data,
-				    VAIQMatrixBufferMPEG2 *parameters);
-void mpeg2_stop_dump(struct dump_driver_data *driver_data);
+void mpeg2_dump_prepare(struct dump_driver_data *driver_data);
+void mpeg2_dump_header(struct dump_driver_data *driver_data);
+
+void h264_dump_prepare(struct dump_driver_data *driver_data);
+void h264_dump_header(struct dump_driver_data *driver_data);
 
 #endif
