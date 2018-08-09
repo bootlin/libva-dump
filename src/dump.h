@@ -57,6 +57,7 @@ struct dump_driver_data {
 	union {
 		struct {
 			VAPictureParameterBufferMPEG2 picture;
+			VASliceParameterBufferMPEG2 slice;
 			VAIQMatrixBufferMPEG2 quantization;
 		} mpeg2;
 		struct {

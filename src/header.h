@@ -31,9 +31,11 @@ void print_s16_matrix(unsigned indent, const char *name,
 		      short *array, unsigned x, unsigned y);
 
 void mpeg2_dump_prepare(struct dump_driver_data *driver_data);
-void mpeg2_dump_header(struct dump_driver_data *driver_data);
+void mpeg2_dump_header(struct dump_driver_data *driver_data, void *slice_data,
+		       unsigned int slice_size);
 
 void h264_dump_prepare(struct dump_driver_data *driver_data);
-void h264_dump_header(struct dump_driver_data *driver_data);
+void h264_dump_header(struct dump_driver_data *driver_data, void *slice_data,
+		      unsigned int slice_size);
 
 #endif

@@ -135,9 +135,19 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 
 		if (buffer_object->type == VASliceDataBufferType) {
 			fprintf(stderr, "Dumping %d bytes of slice %d/%d\n", buffer_object->size, driver_data->frame_index + 1, driver_data->dump_count);
+
+			memcpy(surface_object->slice_data + surface_object->slice_size, buffer_object->data, buffer_object->size);
+			surface_object->slice_size += buffer_object->size;
+
 			write(driver_data->dump_fd, buffer_object->data, buffer_object->size);
 		} else if (buffer_object->type == VASliceParameterBufferType) {
 			switch (config_object->profile) {
+				case VAProfileMPEG2Simple:
+				case VAProfileMPEG2Main:
+					memcpy(&driver_data->params.mpeg2.slice,
+					       buffer_object->data,
+					       sizeof(driver_data->params.mpeg2.slice));
+					break;
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
@@ -225,12 +235,12 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 			case VAProfileH264ConstrainedBaseline:
 			case VAProfileH264MultiviewHigh:
 			case VAProfileH264StereoHigh:
-				h264_dump_header(driver_data);
+				h264_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
 				break;
 
 			case VAProfileMPEG2Simple:
 			case VAProfileMPEG2Main:
-				mpeg2_dump_header(driver_data);
+				mpeg2_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
 				break;
 
 			default:
@@ -241,6 +251,8 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 
 	/* Update last-seen frame index of the surface to stay in sync with current frame index. */
 	surface_object->index = driver_data->frame_index;
+
+	surface_object->slice_size = 0;
 
 	context_object->render_surface_id = VA_INVALID_ID;
 

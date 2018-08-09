@@ -48,6 +48,9 @@ VAStatus DumpCreateSurfaces2(VADriverContextP context, unsigned int format,
 		surface_object->height = height;
 		surface_object->index = i;
 
+		surface_object->slice_data = malloc(1024 * 1024);
+		surface_object->slice_size = 0;
+
 		surfaces_ids[i] = id;
 	}
 
@@ -71,6 +74,8 @@ VAStatus DumpDestroySurfaces(VADriverContextP context,
 		surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, surfaces_ids[i]);
 		if (surface_object == NULL)
 			return VA_STATUS_ERROR_INVALID_SURFACE;
+
+		free(surface_object->slice_data);
 
 		object_heap_free(&driver_data->surface_heap, (struct object_base *) surface_object);
 	}

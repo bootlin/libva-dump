@@ -392,7 +392,8 @@ void h264_dump_prepare(struct dump_driver_data *driver_data)
 {
 }
 
-void h264_dump_header(struct dump_driver_data *driver_data)
+void h264_dump_header(struct dump_driver_data *driver_data, void *slice_data,
+		      unsigned int slice_size)
 {
 	struct dpb_entry *output;
 	unsigned int index = driver_data->frame_index;

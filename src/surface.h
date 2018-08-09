@@ -40,6 +40,9 @@ struct object_surface {
 	unsigned int width;
 	unsigned int height;
 	unsigned int index;
+
+	void *slice_data;
+	unsigned int slice_size;
 };
 
 /*

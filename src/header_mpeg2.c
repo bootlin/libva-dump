@@ -27,28 +27,50 @@
 #include "surface.h"
 
 static void mpeg2_dump_slice_params(struct dump_driver_data *driver_data,
-				    unsigned int indent)
+				    unsigned int indent,
+				    unsigned int slice_size)
 {
 	VAPictureParameterBufferMPEG2 *picture_params =
 		&driver_data->params.mpeg2.picture;
+	VASliceParameterBufferMPEG2 *slice_params =
+		&driver_data->params.mpeg2.slice;
 	struct object_surface *surface_object;
-	char *slice_type;
+	char *picture_coding_type;
 	unsigned int forward_reference_index;
 	unsigned int backward_reference_index;
 	unsigned int index = driver_data->frame_index;
 
 	print_indent(indent++, ".frame.mpeg2.slice_params = {\n");
 
-	if (picture_params->picture_coding_type == 1)
-		slice_type = "V4L2_MPEG2_SLICE_TYPE_I";
-	else if (picture_params->picture_coding_type == 2)
-		slice_type = "V4L2_MPEG2_SLICE_TYPE_P";
-	else if (picture_params->picture_coding_type == 3)
-		slice_type = "V4L2_MPEG2_SLICE_TYPE_B";
-	else
-		slice_type = "V4L2_MPEG2_SLICE_TYPE_INVALID";
+	print_indent(indent, ".bit_size = %d,\n", slice_size * 8);
+	print_indent(indent, ".data_bit_offset = %d,\n", 0);
 
-	print_indent(indent, ".slice_type = %s,\n", slice_type);
+	print_indent(indent++, ".sequence = {\n");
+
+	print_indent(indent, ".horizontal_size = %d,\n",
+		     picture_params->horizontal_size);
+	print_indent(indent, ".vertical_size = %d,\n",
+		     picture_params->vertical_size);
+	print_indent(indent, ".vbv_buffer_size = %d,\n", 1024 * 1024);
+
+	print_indent(indent, ".profile_and_level_indication = %d,\n", 0);
+	print_indent(indent, ".progressive_sequence = %d,\n", 0);
+	print_indent(indent, ".chroma_format = %d,\n", 1); // 4:2:0
+
+	print_indent(--indent, "},\n");
+
+	if (picture_params->picture_coding_type == 1)
+		picture_coding_type = "V4L2_MPEG2_PICTURE_CODING_TYPE_I";
+	else if (picture_params->picture_coding_type == 2)
+		picture_coding_type = "V4L2_MPEG2_PICTURE_CODING_TYPE_P";
+	else if (picture_params->picture_coding_type == 3)
+		picture_coding_type = "V4L2_MPEG2_PICTURE_CODING_TYPE_B";
+	else
+		picture_coding_type = "V4L2_MPEG2_PICTURE_CODING_TYPE_INVALID";
+
+	print_indent(indent++, ".picture = {\n");
+
+	print_indent(indent, ".picture_coding_type = %s,\n", picture_coding_type);
 	print_indent(indent, ".f_code = { %d, %d, %d, %d },\n",
 		     (picture_params->f_code >> 12) & 0xf,
 		     (picture_params->f_code >> 8) & 0xf,
@@ -70,6 +92,15 @@ static void mpeg2_dump_slice_params(struct dump_driver_data *driver_data,
 		     picture_params->picture_coding_extension.bits.intra_vlc_format);
 	print_indent(indent, ".alternate_scan = %d,\n",
 		     picture_params->picture_coding_extension.bits.alternate_scan);
+	print_indent(indent, ".repeat_first_field = %d,\n",
+		     picture_params->picture_coding_extension.bits.repeat_first_field);
+	print_indent(indent, ".progressive_frame = %d,\n",
+		     picture_params->picture_coding_extension.bits.progressive_frame);
+
+	print_indent(--indent, "},\n");
+
+	print_indent(indent, ".quantiser_scale_code = %d,\n",
+		     slice_params->quantiser_scale_code);
 
 	surface_object = (struct object_surface *)
 		object_heap_lookup(&driver_data->surface_heap,
@@ -131,7 +162,8 @@ void mpeg2_dump_prepare(struct dump_driver_data *driver_data)
 {
 }
 
-void mpeg2_dump_header(struct dump_driver_data *driver_data)
+void mpeg2_dump_header(struct dump_driver_data *driver_data, void *slice_data,
+		       unsigned int slice_size)
 {
 	unsigned int index = driver_data->frame_index;
 	unsigned int indent = 1;
@@ -139,7 +171,7 @@ void mpeg2_dump_header(struct dump_driver_data *driver_data)
 	print_indent(indent++, "{\n");
 	print_indent(indent, ".index = %d,\n", index);
 
-	mpeg2_dump_slice_params(driver_data, indent);
+	mpeg2_dump_slice_params(driver_data, indent, slice_size);
 	mpeg2_dump_quantization(driver_data, indent);
 
 	print_indent(--indent, "},\n");
