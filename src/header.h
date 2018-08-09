@@ -38,4 +38,8 @@ void h264_dump_prepare(struct dump_driver_data *driver_data);
 void h264_dump_header(struct dump_driver_data *driver_data, void *slice_data,
 		      unsigned int slice_size);
 
+void h265_dump_prepare(struct dump_driver_data *driver_data);
+void h265_dump_header(struct dump_driver_data *driver_data, void *slice_data,
+		      unsigned int slice_size);
+
 #endif

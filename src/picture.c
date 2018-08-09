@@ -79,6 +79,11 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id,
 	driver_data->dump_fd = fd;
 
 	switch (config_object->profile) {
+		case VAProfileMPEG2Simple:
+		case VAProfileMPEG2Main:
+			mpeg2_dump_prepare(driver_data);
+			break;
+
 		case VAProfileH264Main:
 		case VAProfileH264High:
 		case VAProfileH264ConstrainedBaseline:
@@ -87,9 +92,8 @@ VAStatus DumpBeginPicture(VADriverContextP context, VAContextID context_id,
 			h264_dump_prepare(driver_data);
 			break;
 
-		case VAProfileMPEG2Simple:
-		case VAProfileMPEG2Main:
-			mpeg2_dump_prepare(driver_data);
+		case VAProfileHEVCMain:
+			h265_dump_prepare(driver_data);
 			break;
 
 		default:
@@ -148,6 +152,7 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 					       buffer_object->data,
 					       sizeof(driver_data->params.mpeg2.slice));
 					break;
+
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
@@ -157,8 +162,15 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 					       buffer_object->data,
 					       sizeof(driver_data->params.h264.slice));
 					break;
-			default:
-				break;
+
+				case VAProfileHEVCMain:
+					memcpy(&driver_data->params.h265.slice,
+					       buffer_object->data,
+					       sizeof(driver_data->params.h265.slice));
+					break;
+
+				default:
+					break;
 			}
 		} else if (buffer_object->type == VAPictureParameterBufferType) {
 			switch (config_object->profile) {
@@ -168,6 +180,7 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 					       buffer_object->data,
 					       sizeof(driver_data->params.mpeg2.picture));
 					break;
+
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
@@ -177,6 +190,13 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 					       buffer_object->data,
 					       sizeof(driver_data->params.h264.picture));
 					break;
+
+				case VAProfileHEVCMain:
+					memcpy(&driver_data->params.h265.picture,
+					       buffer_object->data,
+					       sizeof(driver_data->params.h265.picture));
+					break;
+
 				default:
 					break;
 			}
@@ -188,6 +208,7 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 					       buffer_object->data,
 					       sizeof(driver_data->params.mpeg2.quantization));
 					break;
+
 				case VAProfileH264Main:
 				case VAProfileH264High:
 				case VAProfileH264ConstrainedBaseline:
@@ -197,6 +218,13 @@ VAStatus DumpRenderPicture(VADriverContextP context, VAContextID context_id,
 					       buffer_object->data,
 					       sizeof(driver_data->params.h264.quantization));
 					break;
+
+				case VAProfileHEVCMain:
+					memcpy(&driver_data->params.h265.quantization,
+					       buffer_object->data,
+					       sizeof(driver_data->params.h265.quantization));
+					break;
+
 			default:
 				break;
 			}
@@ -230,6 +258,11 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 
 	if (driver_data->frame_index < driver_data->dump_count) {
 		switch (config_object->profile) {
+			case VAProfileMPEG2Simple:
+			case VAProfileMPEG2Main:
+				mpeg2_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
+				break;
+
 			case VAProfileH264Main:
 			case VAProfileH264High:
 			case VAProfileH264ConstrainedBaseline:
@@ -238,9 +271,8 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 				h264_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
 				break;
 
-			case VAProfileMPEG2Simple:
-			case VAProfileMPEG2Main:
-				mpeg2_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
+			case VAProfileHEVCMain:
+				h265_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
 				break;
 
 			default:
