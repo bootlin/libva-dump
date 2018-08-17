@@ -39,8 +39,32 @@ void print_indent(unsigned indent, const char *fmt, ...)
 	va_end(args);
 }
 
+void print_u8_array(unsigned indent, const char *name,
+		    unsigned char *array, unsigned x)
+{
+	int i;
+
+	print_indent(indent, ".%s = { ", name);
+	for (i = 0; i < x; i++) {
+		printf("%d, ", array[i]);
+	}
+	printf("},\n");
+}
+
+void print_s8_array(unsigned indent, const char *name,
+		    signed char *array, unsigned x)
+{
+	int i;
+
+	print_indent(indent, ".%s = { ", name);
+	for (i = 0; i < x; i++) {
+		printf("%d, ", array[i]);
+	}
+	printf("},\n");
+}
+
 void print_s16_array(unsigned indent, const char *name,
-		     short *array, unsigned x)
+		     signed short *array, unsigned x)
 {
 	int i;
 
@@ -82,8 +106,29 @@ void print_u8_matrix(unsigned indent, const char *name,
 		printf("},\n");
 }
 
+void print_s8_matrix(unsigned indent, const char *name,
+		     signed char *array, unsigned x, unsigned y)
+{
+	int i;
+
+	print_indent(indent, ".%s = {", name);
+
+	printf("\n");
+
+	for (i = 0; i < x; i++) {
+		int j;
+
+		print_indent(indent + 1, "{ ");
+		for (j = 0; j < y; j++)
+			printf("%d, ", *(array + i * y + j));
+		printf("},\n");
+	}
+
+	print_indent(indent, "},\n", name);
+}
+
 void print_s16_matrix(unsigned indent, const char *name,
-		      short *array, unsigned x, unsigned y)
+		      signed short *array, unsigned x, unsigned y)
 {
 	int i;
 

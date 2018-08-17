@@ -23,12 +23,18 @@
 #include "dump.h"
 
 void print_indent(unsigned indent, const char *fmt, ...);
+void print_u8_array(unsigned indent, const char *name,
+		    unsigned char *array, unsigned x);
+void print_s8_array(unsigned indent, const char *name,
+		    signed char *array, unsigned x);
 void print_s16_array(unsigned indent, const char *name,
-		     short *array, unsigned x);
+		     signed short *array, unsigned x);
 void print_u8_matrix(unsigned indent, const char *name,
 		     unsigned char *array, unsigned x, unsigned y);
+void print_s8_matrix(unsigned indent, const char *name,
+		     signed char *array, unsigned x, unsigned y);
 void print_s16_matrix(unsigned indent, const char *name,
-		      short *array, unsigned x, unsigned y);
+		      signed short *array, unsigned x, unsigned y);
 
 void mpeg2_dump_prepare(struct dump_driver_data *driver_data);
 void mpeg2_dump_header(struct dump_driver_data *driver_data, void *slice_data,

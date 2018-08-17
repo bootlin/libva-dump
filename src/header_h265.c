@@ -26,6 +26,14 @@
 #include "header.h"
 #include "surface.h"
 
+#define H265_REF_MAX_COUNT			16
+#define H265_REF_INVALID			0xff
+
+#define H265_NAL_UNIT_TYPE_SHIFT		1
+#define H265_NAL_UNIT_TYPE_MASK			((1 << 6) - 1)
+#define H265_NUH_TEMPORAL_ID_PLUS1_SHIFT	0
+#define H265_NUH_TEMPORAL_ID_PLUS1_MASK		((1 << 3) - 1)
+
 static void h265_dump_sps(struct dump_driver_data *driver_data,
 			  unsigned int indent)
 {
@@ -170,26 +178,77 @@ static void h265_dump_slice_params(struct dump_driver_data *driver_data,
 				   unsigned int indent, void *slice_data,
 				   unsigned int sice_size)
 {
+	VAPictureParameterBufferHEVC *picture_params =
+		&driver_data->params.h265.picture;
 	VASliceParameterBufferHEVC *slice_params =
 		&driver_data->params.h265.slice;
-	uint8_t *p = slice_data + slice_params->slice_data_offset;
+	VAPictureHEVC *picture;
+	struct object_surface *surface_object;
 	uint8_t nal_unit_type;
 	uint8_t nuh_temporal_id_plus1;
+	uint32_t data_bit_offset;
+	char *slice_type;
+	uint8_t *b;
+	int8_t array[H265_REF_MAX_COUNT];
+	int8_t matrix[H265_REF_MAX_COUNT][2];
+	unsigned int num_active_dpb_entries;
+	unsigned int num_rps_poc_st_curr_before;
+	unsigned int num_rps_poc_st_curr_after;
+	unsigned int num_rps_poc_lt_curr;
+	unsigned int count, index;
+	unsigned int o, i, j;
+
+	/* Extract the missing NAL header information. */
+
+	b = slice_data + slice_params->slice_data_offset;
+
+	nal_unit_type = (b[0] >> H265_NAL_UNIT_TYPE_SHIFT) &
+			H265_NAL_UNIT_TYPE_MASK;
+	nuh_temporal_id_plus1 = (b[1] >> H265_NUH_TEMPORAL_ID_PLUS1_SHIFT) &
+				H265_NUH_TEMPORAL_ID_PLUS1_MASK;
+
+	/*
+	 * VAAPI only provides a byte-aligned value for the slice segment data
+	 * offset, although it appears that the offset is not always aligned.
+	 * Search for the first one bit in the previous byte, that marks the
+	 * start of the slice segment to correct the value.
+	 */
+
+	b = slice_data + (slice_params->slice_data_offset + slice_params->slice_data_byte_offset) - 1;
+
+	for (o = 0; o < 8; o++)
+		if (*b & (1 << o))
+			break;
+
+	/* Include the one bit. */
+	o++;
+
+	data_bit_offset = (slice_params->slice_data_offset + slice_params->slice_data_byte_offset) * 8 - o;
 
 	print_indent(indent++, ".slice_params = {\n");
 	print_indent(indent, ".bit_size = %d,\n",
 		     slice_params->slice_data_size * 8);
-	print_indent(indent, ".data_bit_offset = %d,\n",
-		     (slice_params->slice_data_offset + slice_params->slice_data_byte_offset - 1) * 8);
-
-	nal_unit_type = (*p++ >> 1) & ((1 << 6) - 1);
-	nuh_temporal_id_plus1 = *p & ((1 << 3) - 1);
+	print_indent(indent, ".data_bit_offset = %d,\n", data_bit_offset);
 
 	print_indent(indent, ".nal_unit_type = %d,\n", nal_unit_type);
 	print_indent(indent, ".nuh_temporal_id_plus1 = %d,\n", nuh_temporal_id_plus1);
 
-	print_indent(indent, ".slice_type = %d,\n",
-		     slice_params->LongSliceFlags.fields.slice_type);
+	switch (slice_params->LongSliceFlags.fields.slice_type) {
+	case 0:
+		slice_type = "V4L2_HEVC_SLICE_TYPE_B";
+		break;
+	case 1:
+		slice_type = "V4L2_HEVC_SLICE_TYPE_P";
+		break;
+	case 2:
+		slice_type = "V4L2_HEVC_SLICE_TYPE_I";
+		break;
+	default:
+		slice_type = "V4L2_HEVC_SLICE_TYPE_INVALID";
+		break;
+	}
+
+	print_indent(indent, ".slice_type = %s,\n", slice_type);
 	print_indent(indent, ".colour_plane_id = %d,\n",
 		     slice_params->LongSliceFlags.fields.color_plane_id);
 	print_indent(indent, ".slice_sao_luma_flag = %d,\n",
@@ -230,18 +289,179 @@ static void h265_dump_slice_params(struct dump_driver_data *driver_data,
 	print_indent(indent, ".num_entry_point_offsets = %d,\n", 0);
 	print_indent(indent, ".entry_point_offset_minus1 = { %d },\n", 0);
 
-	print_indent(indent++, ".pred_weight_table = {\n");
-	print_indent(indent, ".luma_log2_weight_denom = %d,\n", slice_params->luma_log2_weight_denom);
-	print_indent(indent, ".delta_chroma_log2_weight_denom = %d,\n", slice_params->delta_chroma_log2_weight_denom);
+	num_rps_poc_st_curr_before = 0;
+	num_rps_poc_st_curr_after = 0;
+	num_rps_poc_lt_curr = 0;
 
-	// TODO: the rest of pred_weight_table
+	if (slice_params->LongSliceFlags.fields.slice_type != 2)
+		print_indent(indent++, ".dpb = {\n", 0);
+	else
+		print_indent(indent, ".dpb = { %d },\n", 0);
 
-	print_indent(--indent, "},\n");
+	num_active_dpb_entries = 0;
 
-	// TODO: get from list of pic lists
-	print_indent(indent, ".num_rps_poc_st_curr_before = %d,\n", 0);
-	print_indent(indent, ".num_rps_poc_st_curr_after = %d,\n", 0);
-	print_indent(indent, ".num_rps_poc_lt_curr = %d,\n", 0);
+	for (i = 0; i < 15; i++) {
+		picture = &picture_params->ReferenceFrames[i];
+
+		if (picture->picture_id == VA_INVALID_SURFACE ||
+		    (picture->flags & VA_PICTURE_HEVC_INVALID) != 0)
+			break;
+
+		surface_object = (struct object_surface *) object_heap_lookup(&driver_data->surface_heap, picture->picture_id);
+		if (surface_object == NULL)
+			break;
+
+		num_active_dpb_entries++;
+
+		print_indent(indent++, "{\n", 0);
+
+		print_indent(indent, ".buffer_index = %d,\n", surface_object->index);
+
+		if ((picture->flags & VA_PICTURE_HEVC_RPS_ST_CURR_BEFORE) != 0) {
+			print_indent(indent, ".rps = V4L2_HEVC_DPB_ENTRY_RPS_ST_CURR_BEFORE,\n");
+			num_rps_poc_st_curr_before++;
+		} else if ((picture->flags & VA_PICTURE_HEVC_RPS_ST_CURR_AFTER) != 0) {
+			print_indent(indent, ".rps = V4L2_HEVC_DPB_ENTRY_RPS_ST_CURR_AFTER,\n");
+			num_rps_poc_st_curr_after++;
+		} else if ((picture->flags & VA_PICTURE_HEVC_RPS_LT_CURR) != 0) {
+			print_indent(indent, ".rps = V4L2_HEVC_DPB_ENTRY_RPS_LT_CURR,\n");
+			num_rps_poc_lt_curr++;
+		} else {
+			print_indent(indent, ".rps = 0,\n");
+		}
+
+		print_indent(indent, ".pic_order_cnt = %d,\n",
+			     picture->pic_order_cnt);
+
+		print_indent(--indent, "},\n");
+	}
+
+	if (slice_params->LongSliceFlags.fields.slice_type != 2)
+		print_indent(--indent, "},\n");
+
+	print_indent(indent, ".num_active_dpb_entries = %d,\n",
+		     num_active_dpb_entries);
+
+	/* L0 reference picture list for non-I (P and B) frames. */
+	if (slice_params->LongSliceFlags.fields.slice_type != 2) {
+		count = slice_params->num_ref_idx_l0_active_minus1 + 1;
+
+		for (i = 0; i < count; i++)
+			array[i] = slice_params->RefPicList[0][i];
+		for (; i < H265_REF_MAX_COUNT; i++)
+			array[i] = H265_REF_INVALID;
+
+		print_u8_array(indent, "ref_idx_l0", array, H265_REF_MAX_COUNT);
+	} else {
+		print_indent(indent, ".ref_idx_l0 = { %d },\n", 0xff);
+	}
+
+	/* L1 reference picture list for B frames. */
+	if (slice_params->LongSliceFlags.fields.slice_type == 0) {
+		count = slice_params->num_ref_idx_l1_active_minus1 + 1;
+
+		for (i = 0; i < count; i++)
+			array[i] = slice_params->RefPicList[1][i];
+		for (; i < H265_REF_MAX_COUNT; i++)
+			array[i] = H265_REF_INVALID;
+
+		print_u8_array(indent, "ref_idx_l1", array, H265_REF_MAX_COUNT);
+	} else {
+		print_indent(indent, ".ref_idx_l1 = { %d },\n", 0xff);
+	}
+
+	print_indent(indent, ".num_rps_poc_st_curr_before = %d,\n",
+		     num_rps_poc_st_curr_before);
+	print_indent(indent, ".num_rps_poc_st_curr_after = %d,\n",
+		     num_rps_poc_st_curr_after);
+	print_indent(indent, ".num_rps_poc_lt_curr = %d,\n",
+		     num_rps_poc_lt_curr);
+
+	print_indent(indent, ".pic_order_cnt = %d,\n", picture_params->CurrPic.pic_order_cnt);
+
+	if (slice_params->LongSliceFlags.fields.slice_type != 2)
+		print_indent(indent++, ".pred_weight_table = {\n");
+	else
+		print_indent(indent, ".pred_weight_table = { %d },\n", 0);
+
+	if (slice_params->LongSliceFlags.fields.slice_type != 2) {
+		print_indent(indent, ".luma_log2_weight_denom = %d,\n", slice_params->luma_log2_weight_denom);
+		print_indent(indent, ".delta_chroma_log2_weight_denom = %d,\n", slice_params->delta_chroma_log2_weight_denom);
+
+		for (i = 0; i < 15; i++)
+			array[i] = slice_params->delta_luma_weight_l0[i];
+		for (; i < H265_REF_MAX_COUNT; i++)
+			array[i] = 0;
+
+		print_s8_array(indent, "delta_luma_weight_l0", array, H265_REF_MAX_COUNT);
+
+		for (i = 0; i < 15; i++)
+			array[i] = slice_params->luma_offset_l0[i];
+		for (; i < H265_REF_MAX_COUNT; i++)
+			array[i] = 0;
+
+		print_s8_array(indent, "luma_offset_l0", array, H265_REF_MAX_COUNT);
+
+		for (j = 0; j < 2; j++) {
+			for (i = 0; i < 15; i++)
+				matrix[i][j] = slice_params->delta_chroma_weight_l0[i][j];
+			for (; i < H265_REF_MAX_COUNT; i++)
+				matrix[i][j] = 0;
+		}
+
+		print_s8_matrix(indent, "delta_chroma_weight_l0", matrix, H265_REF_MAX_COUNT, 2);
+
+		for (j = 0; j < 2; j++) {
+			for (i = 0; i < 15; i++)
+				matrix[i][j] = slice_params->ChromaOffsetL0[i][j];
+			for (; i < H265_REF_MAX_COUNT; i++)
+				matrix[i][j] = 0;
+		}
+
+		print_s8_matrix(indent, "chroma_offset_l0", matrix, H265_REF_MAX_COUNT, 2);
+	}
+
+	if (slice_params->LongSliceFlags.fields.slice_type == 0) {
+		for (i = 0; i < 15; i++)
+			array[i] = slice_params->delta_luma_weight_l1[i];
+		for (; i < H265_REF_MAX_COUNT; i++)
+			array[i] = 0;
+
+		print_s8_array(indent, "delta_luma_weight_l1", array, H265_REF_MAX_COUNT);
+
+		for (i = 0; i < 15; i++)
+			array[i] = slice_params->luma_offset_l1[i];
+		for (; i < H265_REF_MAX_COUNT; i++)
+			array[i] = 0;
+
+		print_s8_array(indent, "luma_offset_l1", array, H265_REF_MAX_COUNT);
+
+		for (j = 0; j < 2; j++) {
+			for (i = 0; i < 15; i++)
+				matrix[i][j] = slice_params->delta_chroma_weight_l1[i][j];
+			for (; i < H265_REF_MAX_COUNT; i++)
+				matrix[i][j] = 0;
+		}
+
+		print_s8_matrix(indent, "delta_chroma_weight_l1", matrix, H265_REF_MAX_COUNT, 2);
+
+		for (j = 0; j < 2; j++) {
+			for (i = 0; i < 15; i++)
+				matrix[i][j] = slice_params->ChromaOffsetL1[i][j];
+			for (; i < H265_REF_MAX_COUNT; i++)
+				matrix[i][j] = 0;
+		}
+
+		print_s8_matrix(indent, "chroma_offset_l1", matrix, H265_REF_MAX_COUNT, 2);
+	} else if (slice_params->LongSliceFlags.fields.slice_type != 2) {
+		print_indent(indent, ".delta_luma_weight_l1 = { %d },\n", 0);
+		print_indent(indent, ".luma_offset_l1 = { %d },\n", 0);
+		print_indent(indent, ".delta_chroma_weight_l1 = { %d },\n", 0);
+		print_indent(indent, ".chroma_offset_l1 = { %d },\n", 0);
+	}
+
+	if (slice_params->LongSliceFlags.fields.slice_type != 2)
+		print_indent(--indent, "},\n");
 
 	print_indent(--indent, "},\n");
 }
@@ -258,7 +478,7 @@ void h265_dump_header(struct dump_driver_data *driver_data, void *slice_data,
 
 	print_indent(indent++, "{\n");
 	print_indent(indent, ".index = %d,\n", index);
-	print_indent(indent, ".output_buffer = %d,\n", index);
+	print_indent(indent, ".output_buffer = %d,\n", index % H265_REF_MAX_COUNT);
 	print_indent(indent++, ".frame.h265 = {\n");
 
 	h265_dump_sps(driver_data, indent);
