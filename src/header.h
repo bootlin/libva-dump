@@ -18,9 +18,8 @@
 #ifndef _HEADER_H_
 #define _HEADER_H_
 
-#include <va/va_backend.h>
-
-#include "dump.h"
+struct dump_driver_data;
+struct object_surface;
 
 void print_indent(unsigned indent, const char *fmt, ...);
 void print_s16_array(unsigned indent, const char *name,
@@ -35,7 +34,6 @@ void mpeg2_dump_header(struct dump_driver_data *driver_data, void *slice_data,
 		       unsigned int slice_size);
 
 void h264_dump_prepare(struct dump_driver_data *driver_data);
-void h264_dump_header(struct dump_driver_data *driver_data, void *slice_data,
-		      unsigned int slice_size);
+void h264_dump_header(struct dump_driver_data *driver_data, struct object_surface *surface);
 
 #endif

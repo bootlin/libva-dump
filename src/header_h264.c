@@ -33,6 +33,7 @@
 struct dpb_entry {
 	VAPictureH264	pic;
 	unsigned int	age;
+	unsigned int	tag;
 	bool		used;
 	bool		valid;
 	bool		reserved;
@@ -88,11 +89,6 @@ static struct dpb_entry *find_dpb_entry()
 	return entry;
 }
 
-static int dpb_find_entry_index(struct dpb_entry *entry)
-{
-	return entry - &local_dpb.entries[0];
-}
-
 static struct dpb_entry *dpb_lookup(VAPictureH264 *pic, unsigned int *idx)
 {
 	unsigned int i;
@@ -116,8 +112,7 @@ static struct dpb_entry *dpb_lookup(VAPictureH264 *pic, unsigned int *idx)
 
 static bool is_pic_null(VAPictureH264 *pic)
 {
-	return !pic->frame_idx && !pic->TopFieldOrderCnt &&
-		!pic->BottomFieldOrderCnt;
+	return pic->flags & VA_PICTURE_H264_INVALID;
 }
 
 static void clear_dpb_entry(struct dpb_entry *entry, bool reserved)
@@ -128,7 +123,7 @@ static void clear_dpb_entry(struct dpb_entry *entry, bool reserved)
 		entry->reserved = true;
 }
 
-static void insert_in_dpb(VAPictureH264 *pic, struct dpb_entry *entry)
+static void insert_in_dpb(VAPictureH264 *pic, struct dpb_entry *entry, unsigned int tag)
 {
 	if (is_pic_null(pic))
 		return;
@@ -140,6 +135,7 @@ static void insert_in_dpb(VAPictureH264 *pic, struct dpb_entry *entry)
 		entry = find_dpb_entry();
 
 	memcpy(&entry->pic, pic, sizeof(entry->pic));
+	entry->tag = tag;
 	entry->age = local_dpb.age;
 	entry->valid = true;
 	entry->reserved = false;
@@ -148,8 +144,9 @@ static void insert_in_dpb(VAPictureH264 *pic, struct dpb_entry *entry)
 		entry->used = true;
 }
 
-static void update_dpb(VAPictureParameterBufferH264 *picture_params)
+static void update_dpb(struct dump_driver_data *driver)
 {
+	VAPictureParameterBufferH264 *picture_params = &driver->params.h264.picture;
 	unsigned int i;
 
 	local_dpb.age++;
@@ -172,7 +169,11 @@ static void update_dpb(VAPictureParameterBufferH264 *picture_params)
 			entry->age = local_dpb.age;
 			entry->used = true;
 		} else {
-			insert_in_dpb(pic, NULL);
+			struct object_surface *surface;
+
+			surface = (struct object_surface *)object_heap_lookup(&driver->surface_heap,
+									      pic->picture_id);
+			insert_in_dpb(pic, NULL, surface->index);
 		}
 	}
 }
@@ -195,8 +196,7 @@ static void h264_dump_dpb(struct dump_driver_data *driver_data,
 		print_indent(indent++, "[%d] = {\n", i);
 
 		print_indent(indent, ".frame_num = %d,\n", pic->frame_idx);
-		print_indent(indent, ".buf_index = %d,\n",
-			     dpb_find_entry_index(entry));
+		print_indent(indent, ".timestamp = TS_REF_INDEX(%d),\n", entry->tag);
 		print_indent(indent, ".top_field_order_cnt = %d,\n",
 			     pic->TopFieldOrderCnt);
 		print_indent(indent, ".bottom_field_order_cnt = %d,\n",
@@ -392,25 +392,23 @@ void h264_dump_prepare(struct dump_driver_data *driver_data)
 {
 }
 
-void h264_dump_header(struct dump_driver_data *driver_data, void *slice_data,
-		      unsigned int slice_size)
+void h264_dump_header(struct dump_driver_data *driver_data, struct object_surface *surface)
 {
+	VAPictureH264 *pic = &driver_data->params.h264.picture.CurrPic;
 	struct dpb_entry *output;
 	unsigned int index = driver_data->frame_index;
 	unsigned int indent = 1;
 
-	output = dpb_lookup(&driver_data->params.h264.picture.CurrPic, NULL);
+	output = dpb_lookup(pic, NULL);
 	if (!output)
 		output = find_dpb_entry();
 
 	clear_dpb_entry(output, true);
 
-	update_dpb(&driver_data->params.h264.picture);
+	update_dpb(driver_data);
 
 	print_indent(indent++, "{\n");
 	print_indent(indent, ".index = %d,\n", index);
-	print_indent(indent, ".output_buffer = %d,\n",
-		     dpb_find_entry_index(output));
 	print_indent(indent++, ".frame.h264 = {\n");
 
 	h264_emit_picture_parameter(driver_data, indent);
@@ -420,5 +418,5 @@ void h264_dump_header(struct dump_driver_data *driver_data, void *slice_data,
 	print_indent(--indent, "},\n");
 	print_indent(--indent, "},\n");
 
-	insert_in_dpb(&driver_data->params.h264.picture.CurrPic, output);
+	insert_in_dpb(pic, output, index);
 }

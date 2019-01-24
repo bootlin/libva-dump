@@ -235,7 +235,7 @@ VAStatus DumpEndPicture(VADriverContextP context, VAContextID context_id)
 			case VAProfileH264ConstrainedBaseline:
 			case VAProfileH264MultiviewHigh:
 			case VAProfileH264StereoHigh:
-				h264_dump_header(driver_data, surface_object->slice_data, surface_object->slice_size);
+				h264_dump_header(driver_data, surface_object);
 				break;
 
 			case VAProfileMPEG2Simple:
