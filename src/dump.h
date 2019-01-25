@@ -65,6 +65,11 @@ struct dump_driver_data {
 			VASliceParameterBufferH264 slice;
 			VAIQMatrixBufferH264 quantization;
 		} h264;
+		struct {
+			VAPictureParameterBufferHEVC picture;
+			VASliceParameterBufferHEVC slice;
+			VAIQMatrixBufferHEVC quantization;
+		} h265;
 	} params;
 };
 
