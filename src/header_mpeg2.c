@@ -110,7 +110,7 @@ static void mpeg2_dump_slice_params(struct dump_driver_data *driver_data,
 	else
 		forward_reference_index = index;
 
-	print_indent(indent, ".forward_ref_index = %d,\n", forward_reference_index);
+	print_indent(indent, ".forward_ref_ts = TS_REF_INDEX(%d),\n", forward_reference_index);
 
 	surface_object = (struct object_surface *)
 		object_heap_lookup(&driver_data->surface_heap,
@@ -120,7 +120,7 @@ static void mpeg2_dump_slice_params(struct dump_driver_data *driver_data,
 	else
 		backward_reference_index = index;
 
-	print_indent(indent, ".backward_ref_index = %d,\n", backward_reference_index);
+	print_indent(indent, ".backward_ref_ts = TS_REF_INDEX(%d),\n", backward_reference_index);
 
 	print_indent(--indent, "},\n");
 }
